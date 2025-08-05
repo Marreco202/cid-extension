@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
 					//Spits out message sentence by sentence instead the entire thing
 					for await (const part of streamResponse) {
 						responseText += part.message.content;
-						panel.webview.postMessage({command: 'chatResponse', text: responseText})
+						panel.webview.postMessage({command: 'chatResponse', text: responseText});
 					}
 
 
