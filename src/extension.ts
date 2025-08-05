@@ -8,9 +8,8 @@ import ollama from 'ollama';
 export function activate(context: vscode.ExtensionContext) {
 
 	console.log('Congratulations, your extension "cid" is now active!');
-
 	
-	const disposable = vscode.commands.registerCommand('cid.helloWorld', () => {
+	const helloWorld = vscode.commands.registerCommand('cid.helloWorld', () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from CID!');
@@ -50,8 +49,36 @@ export function activate(context: vscode.ExtensionContext) {
 		}, undefined, context.subscriptions);
 	});
 
-	context.subscriptions.push(disposable);
+	
+	context.subscriptions.push(helloWorld);
+
+	context.subscriptions.push(
+	vscode.commands.registerCommand('cid.listWorkspaceFiles', listWorkspaceFiles)
+	);
+	
+	context.subscriptions.push(
+	vscode.commands.registerCommand('cid.explainCurrentFile', explainCurrentFile)
+	);
+
 }
+
+
+async function listWorkspaceFiles(){
+	const files = await vscode.workspace.findFiles('**/*.ts'); // find all .ts files from my project under any folder
+	const paths = files.map(uri => uri.fsPath).join('\n');
+	vscode.window.showInformationMessage(`Arquivos encontrados:\n${paths}`, { modal: true });
+}
+
+
+async function explainCurrentFile(){
+	const editor = vscode.window.activeTextEditor;
+	if (editor) {
+		const text = editor.document.getText();
+		vscode.window.showInformationMessage(`Codigo atual:\n${text}`, { modal: true });
+	}
+		return undefined;
+}
+
 
 function getWebViewContent(): string {
 	return /*html*/`
@@ -132,6 +159,6 @@ function getWebViewContent(): string {
 `;
 
 }
-	
+
 // This method is called when your extension is deactivated
 export function deactivate() {}
