@@ -15,7 +15,15 @@
     "commands": [
       {
         "command": "cid.helloWorld",
-        "title": "Hello World"
+        "title": "CID : Open Chat"
+      },
+      {
+        "command" : "cid.listWorkspaceFiles",
+        "title" : "CID : List Workspace Files"
+      },
+      {
+        "command" : "cid.explainCurrentFile",
+        "title": "CID : Explain Current File"
       }
     ]
   },
