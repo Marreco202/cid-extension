@@ -32,25 +32,22 @@ export function activate(context: vscode.ExtensionContext) {
 
 				try {
 					const streamResponse = await ollama.chat({
-						model : 'deepseek-coder:1.3b',
-						messages: [{role: 'user', content: userPrompt}],
+						model: 'deepseek-coder:1.3b',
+						messages: [{ role: 'user', content: userPrompt }],
 						stream: true
 					});
 
-					//Spits out message sentence by sentence instead the entire thing
 					for await (const part of streamResponse) {
 						responseText += part.message.content;
-						panel.webview.postMessage({command: 'chatResponse', text: responseText});
+						panel.webview.postMessage({ command: 'chatResponse', text: responseText });
 					}
-
-
-				} catch(err){
-					console.log("oops");
+				} catch (err) {
+					console.error("Error during chat:", err);
 				}
 			}
 
 
-		});
+		}, undefined, context.subscriptions);
 	});
 
 	context.subscriptions.push(disposable);
@@ -106,9 +103,9 @@ function getWebViewContent(): string {
 	</style>
   </head>
   <body>
-	<h1>Deep Fucking Chat</h1>
-	<textarea id="prompt" placeholder="Create a JS function for binary search"></textarea><br>
-	<button onclick="ask()">Ask</button>
+	<h1>Deep Chat</h1>
+	<textarea id="prompt" placeholder="Type your question here..."></textarea><br>
+	<button id="askBtn">Ask</button>
 
 	<div class="response" id="response">
 	  &lt;think&gt;\nWaiting for your question...
@@ -120,11 +117,10 @@ function getWebViewContent(): string {
 	  document.getElementById('askBtn').addEventListener('click', () => {
 		const text = document.getElementById('prompt').value;
 		vscode.postMessage({ command: 'chat', text });
-
 	  });
 
-	  windows.addEventListener('message', event => {
-		const {command, text} = event.data;
+	  window.addEventListener('message', event => {
+		const { command, text } = event.data;
 		if (command === 'chatResponse') {
 			document.getElementById('response').innerText = text;
 		}
