@@ -84,10 +84,16 @@ async function explainCurrentFile(){
 }
 
 
-	async function analyzePythonFiles() {
+async function analyzePythonFiles() {
     const files = await vscode.workspace.findFiles('**/*.py'); // procura todos arquivos .py no workspace
+	const output = vscode.window.createOutputChannel("CID: Python functions");
+	output.clear();
 
     let result: string[] = [];
+
+	 // --- ADICIONE ESTA LINHA PARA DEBUG ---
+    console.log(`Arquivos .py encontrados: ${files.length}`, files.map(f => f.fsPath));
+
 
     for (const file of files) {
         const document = await vscode.workspace.openTextDocument(file);
@@ -97,6 +103,11 @@ async function explainCurrentFile(){
         const funcRegex = /def\s+(\w+)\s*\(([^)]*)\)(?:\s*->\s*([\w\[\],. ]+))?:\s*([\s\S]*?)(?=^def|\Z)/gm;
 
         let match;
+
+		// --- ADICIONE ESTAS LINHAS PARA DEBUG ---
+		output.append(`--- Analisando o arquivo: ${file.fsPath} ---`);
+
+		// console.log(text); // Descomente esta linha para ver o conteúdo completo do arquivo
         while ((match = funcRegex.exec(text)) !== null) {
             const [, funcName, paramsRaw, returnType, body] = match;
 			
@@ -122,13 +133,12 @@ async function explainCurrentFile(){
             );
         }
     }
-
+	
     // Exibir resultado em uma janela de output
-    const output = vscode.window.createOutputChannel("Python Analysis");
-    output.clear();
+	console.log(result);
     output.append(result.join("\n---------------------\n"));
     output.show(true);
-	console.log(output);
+	// console.log(output);
 }
 
 function getWebViewContent(): string {

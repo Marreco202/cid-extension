@@ -18,16 +18,16 @@
         "title": "CID : Open Chat"
       },
       {
-        "command" : "cid.listWorkspaceFiles",
-        "title" : "CID : List Workspace Files"
+        "command": "cid.listWorkspaceFiles",
+        "title": "CID : List Workspace Files"
       },
       {
-        "command" : "cid.explainCurrentFile",
+        "command": "cid.explainCurrentFile",
         "title": "CID : Explain Current File"
       },
       {
-        "command" : "cid.analyzePythonFiles",
-        "title" : "CID : List all functions on project"
+        "command": "cid.analyzePythonFiles",
+        "title": "CID : List all functions on project"
       }
     ]
   },
@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "20.x",
+    "@types/node": "^20.19.11",
     "@types/vscode": "^1.102.0",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",
