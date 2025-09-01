@@ -60,6 +60,10 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('cid.explainCurrentFile', explainCurrentFile)
 	);
 
+	context.subscriptions.push(
+	vscode.commands.registerCommand('cid.analyzePythonFiles', analyzePythonFiles)
+	);
+
 }
 
 
@@ -79,6 +83,53 @@ async function explainCurrentFile(){
 		return undefined;
 }
 
+
+	async function analyzePythonFiles() {
+    const files = await vscode.workspace.findFiles('**/*.py'); // procura todos arquivos .py no workspace
+
+    let result: string[] = [];
+
+    for (const file of files) {
+        const document = await vscode.workspace.openTextDocument(file);
+        const text = document.getText();
+
+        // Regex para capturar definições de função
+        const funcRegex = /def\s+(\w+)\s*\(([^)]*)\)(?:\s*->\s*([\w\[\],. ]+))?:\s*([\s\S]*?)(?=^def|\Z)/gm;
+
+        let match;
+        while ((match = funcRegex.exec(text)) !== null) {
+            const [, funcName, paramsRaw, returnType, body] = match;
+			
+            // Extrair docstring (se existir no início do corpo da função)
+            const docstringMatch = body.match(/^\s*"""([\s\S]*?)"""/) || body.match(/^\s*'''([\s\S]*?)'''/);
+            const docstring = docstringMatch ? docstringMatch[1].trim() : "Sem docstring";
+
+            // Processar parâmetros
+            const params = paramsRaw.split(',')
+                .map(p => p.trim())
+                .filter(p => p.length > 0)
+                .map(p => {
+                    const [name, type] = p.split(':').map(s => s.trim());
+                    return `${name}${type ? `: ${type}` : ''}`;
+                });
+
+            result.push(
+                `Arquivo: ${file.fsPath}\n` +
+                `Função: ${funcName}\n` +
+                `Parâmetros: ${params.join(', ') || "nenhum"}\n` +
+                `Retorno: ${returnType || "não especificado"}\n` +
+                `Docstring: ${docstring}\n`
+            );
+        }
+    }
+
+    // Exibir resultado em uma janela de output
+    const output = vscode.window.createOutputChannel("Python Analysis");
+    output.clear();
+    output.append(result.join("\n---------------------\n"));
+    output.show(true);
+	console.log(output);
+}
 
 function getWebViewContent(): string {
 	return /*html*/`

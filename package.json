@@ -24,6 +24,10 @@
       {
         "command" : "cid.explainCurrentFile",
         "title": "CID : Explain Current File"
+      },
+      {
+        "command" : "cid.analyzePythonFiles",
+        "title" : "CID : List all functions on project"
       }
     ]
   },
