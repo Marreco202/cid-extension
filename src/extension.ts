@@ -83,7 +83,6 @@ async function explainCurrentFile(){
 		return undefined;
 }
 
-
 async function analyzePythonFiles() {
     const files = await vscode.workspace.findFiles('**/*.py'); // procura todos arquivos .py no workspace
 	const output = vscode.window.createOutputChannel("CID: Python functions");
@@ -100,7 +99,7 @@ async function analyzePythonFiles() {
         const text = document.getText();
 
         // Regex para capturar definições de função
-        const funcRegex = /^\s*(?:async\s+)?def\s+([a-zA-Z_]\w*)\s*\(([^)]*)\)\s*(?:->\s*([^:]+))?:\s*([\s\S]*?)(?=^\s*(?:@|async\s+|def)|\Z)/gm;
+        const funcRegex = /^\s*(?:async\s+)?def\s+([a-zA-Z_]\w*)\s*\(([^)]*)\)\s*(?:->\s*([^:]+))?:\s*([\s\S]*?)(?=^\s*(?:@|async\s+|def)|$)/gm;
 
         let match;
 
