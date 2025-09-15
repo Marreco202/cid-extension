@@ -99,7 +99,8 @@ async function analyzePythonFiles() {
         const text = document.getText();
 
         // Regex para capturar definições de função
-        const funcRegex = /^\s*(?:async\s+)?def\s+([a-zA-Z_]\w*)\s*\(([^)]*)\)\s*(?:->\s*([^:]+))?:\s*([\s\S]*?)(?=^\s*(?:@|async\s+|def)|$)/gm;
+
+		const funcRegex = /^\s*(?:async\s+)?def\s+([a-zA-Z_]\w*)\s*\(([^)]*)\)\s*(?:->\s*([\w\s\[\].]+))?:([\s\S]*?)(?=^\s*(?:@|async\s+|def)|$(?![\s\S]))/gm;
 
         let match;
 
