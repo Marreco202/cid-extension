@@ -29,7 +29,18 @@
         "command": "cid.analyzePythonFiles",
         "title": "CID : List all functions on project"
       }
-    ]
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id" : "cid.functions.view",
+          "name" : "Funções CID",
+          "icon": "smiley",
+          "contextualTitle": "Funções Python"
+
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
