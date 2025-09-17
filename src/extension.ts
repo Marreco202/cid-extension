@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	  // REGISTRA A NOVA TREE VIEW
 	const functionsProvider = new FunctionsTreeDataProvider();
-	vscode.window.createTreeView('cid.functions.view', { // O ID DEVE SER O MESMO DO package.json
+	vscode.window.createTreeView('cid.functionsView', { // O ID DEVE SER O MESMO DO package.json
 		treeDataProvider: functionsProvider
 	});
 

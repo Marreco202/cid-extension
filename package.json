@@ -31,15 +31,30 @@
       }
     ],
     "views": {
-      "explorer": [
+      "cid-container": [
         {
-          "id" : "cid.functions.view",
+          "id" : "cid.functionsView",
           "name" : "Funções CID",
-          "icon": "smiley",
-          "contextualTitle": "Funções Python"
-
+          "icon": "media/smile.svg"
         }
       ]
+    },
+
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id" : "cid-container",
+          "title" : "CID Assistant",
+          "icon" : "media/smile.svg"
+        }
+      ]
+    },
+
+    "activities" : {
+      "id" : "cid-activity",
+      "viewsContainersId" : "cid-container",
+      "title" : "CID Assistant",
+      "icon" : "media/icon.svg"
     }
   },
   "scripts": {
