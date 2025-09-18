@@ -1,13 +1,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import ollama from 'ollama';
 
 
-import { FunctionsTreeDataProvider } from './FunctionsTreeDataProvider';
-import {listWorkspaceFiles, explainCurrentFile,analyzePythonFiles} from './extractionFeatures';
-import {getChatWebViewContent} from './webViews';
-import {ChatViewProvider} from './ChatViewProvider';
+import { FunctionsTreeDataProvider } from './providers/FunctionsTreeDataProvider';
+import {listWorkspaceFiles, explainCurrentFile,analyzePythonFiles} from './ExtractionFeatures'; //FIX: Change import to correct file name
+import {ChatViewProvider} from './providers/ChatViewProvider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed

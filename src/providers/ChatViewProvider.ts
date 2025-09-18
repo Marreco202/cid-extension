@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
-import {streamChatResponse} from './OllamaService';
-import {getChatWebViewContent} from './webViews';
+import {streamChatResponse} from '../services/OllamaService';
+import {getChatWebViewContent} from '../WebViews';
 
 export class ChatViewProvider {
 
