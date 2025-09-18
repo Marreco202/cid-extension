@@ -6,7 +6,8 @@ import ollama from 'ollama';
 
 import { FunctionsTreeDataProvider } from './FunctionsTreeDataProvider';
 import {listWorkspaceFiles, explainCurrentFile,analyzePythonFiles} from './extractionFeatures';
-import {getWebViewContent} from './webViews';
+import {getChatWebViewContent} from './webViews';
+import {ChatViewProvider} from './ChatViewProvider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -19,62 +20,30 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	console.log('Congratulations, your extension "cid" is now active!');
+	vscode.window.showInformationMessage('Hello World from CID!');
+
 	
-	const helloWorld = vscode.commands.registerCommand('cid.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from CID!');
+	// Instancia o nosso provedor da view de chat
+	const chatProvider = new ChatViewProvider(context);
 
-		const panel = vscode.window.createWebviewPanel(
-			'cidChat',
-			'CID Assistant Chat',
-			vscode.ViewColumn.One,
-			{enableScripts : true}
-		);
-		
-		panel.webview.html = getWebViewContent();
-
-		panel.webview.onDidReceiveMessage(async (message: any) => {
-			if (message.command === 'chat') {
-				const userPrompt = message.text;
-				let responseText = '';
-
-
-				try {
-					const streamResponse = await ollama.chat({
-						model: 'deepseek-coder:1.3b',
-						messages: [{ role: 'user', content: userPrompt }],
-						stream: true
-					});
-
-					for await (const part of streamResponse) {
-						responseText += part.message.content;
-						panel.webview.postMessage({ command: 'chatResponse', text: responseText });
-					}
-				} catch (err) {
-					console.error("Error during chat:", err);
-				}
-			}
-
-
-		}, undefined, context.subscriptions);
+	// Registra o comando que simplesmente chama o método para mostrar a janela
+	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', () => {
+		chatProvider.createOrShow();
 	});
-
 	
-	context.subscriptions.push(helloWorld);
-
 	context.subscriptions.push(
-	vscode.commands.registerCommand('cid.listWorkspaceFiles', listWorkspaceFiles)
+		vscode.commands.registerCommand('cid.listWorkspaceFiles', listWorkspaceFiles)
 	);
 	
 	context.subscriptions.push(
-	vscode.commands.registerCommand('cid.explainCurrentFile', explainCurrentFile)
+		vscode.commands.registerCommand('cid.explainCurrentFile', explainCurrentFile)
 	);
-
+	
 	context.subscriptions.push(
-	vscode.commands.registerCommand('cid.analyzePythonFiles', analyzePythonFiles)
+		vscode.commands.registerCommand('cid.analyzePythonFiles', analyzePythonFiles)
 	);
-
+	
+	context.subscriptions.push(chatCommand);
 }
 
 // This method is called when your extension is deactivated

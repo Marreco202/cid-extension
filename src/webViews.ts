@@ -1,5 +1,5 @@
 
-export function getWebViewContent(): string {
+export function getChatWebViewContent(): string {
 	return /*html*/`
 <!DOCTYPE html>
 <html lang="en">
