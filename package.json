@@ -15,7 +15,8 @@
     "commands": [
       {
         "command": "cid.helloWorld",
-        "title": "CID : Open Chat"
+        "title": "CID : Open Chat",
+        "icon": "$(comment-discussion)"
       },
       {
         "command": "cid.listWorkspaceFiles",
@@ -36,6 +37,16 @@
           "id" : "cid.functionsView",
           "name" : "Funções CID",
           "icon": "media/smile.svg"
+        }
+      ]
+    },
+
+    "menus": {
+      "view/title": [
+        {
+          "command": "cid.helloWorld",
+          "when": "view === cid.functionsView",
+          "group" : "navigation"
         }
       ]
     },
