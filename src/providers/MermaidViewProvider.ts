@@ -3,13 +3,13 @@ import * as path from 'path';
 
 import {} from '../services/RepositoryService';
 import {getMermaidWebviewContent} from '../WebViews';
+import {chatResponse} from '../services/OllamaService';
 
 
 export class MermaidViewProvider {
 
     private readonly _context : vscode.ExtensionContext;
     
-
     constructor(context: vscode.ExtensionContext){
         this._context = context;
     }
@@ -38,8 +38,6 @@ export class MermaidViewProvider {
       // 4. Definir o conteúdo HTML da webview
       panel.webview.html = getMermaidWebviewContent(fileContent, panel.webview, context.extensionUri);
     }
-
-
 
 }
 

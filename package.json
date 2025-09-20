@@ -33,6 +33,10 @@
       {
         "command": "cid.renderMermaid",
         "title": "CID : Render Mermaid File on Webview"
+      },
+      {
+        "command": "cid.explainSelectedCode",
+        "title": "CID : Explain Selected Code"
       }
     ],
     "views": {
