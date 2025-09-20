@@ -6,7 +6,7 @@ import * as path from 'path';
 import { FunctionsTreeDataProvider } from './providers/FunctionsTreeDataProvider';
 import {listWorkspaceFiles, explainCurrentFile,analyzePythonFiles} from './ExtractionFeatures'; //FIX: Change import to correct file name
 import {ChatViewProvider} from './providers/ChatViewProvider';
-import {getMermaidWebviewContent} from './WebViews';
+import {MermaidViewProvider} from './providers/MermaidViewProvider';
 
 
 // This method is called when your extension is activated
@@ -22,13 +22,17 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "cid" is now active!');
 	vscode.window.showInformationMessage('Hello World from CID!');
 
-	
 	// Instancia o nosso provedor da view de chat
 	const chatProvider = new ChatViewProvider(context);
+	const mermaidProvider = new MermaidViewProvider(context);
 
 	// Registra o comando que simplesmente chama o método para mostrar a janela
 	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', () => {
 		chatProvider.createOrShow();
+	});
+
+	const showMermaidCommand = vscode.commands.registerCommand('cid.renderMermaid', () => {
+		mermaidProvider.showMermaidPreview(context);
 	});
 	
 	context.subscriptions.push(
@@ -42,40 +46,9 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('cid.analyzePythonFiles', analyzePythonFiles)
 	);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('cid.renderMermaid', () => {
-			showMermaidPreview(context); 
-		})
-	);
 	
 	context.subscriptions.push(chatCommand);
-}
-
-async function showMermaidPreview(context: vscode.ExtensionContext) {
-  // 1. Obter o editor de texto ativo
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) {
-    vscode.window.showErrorMessage('Nenhum arquivo aberto para pré-visualizar como Mermaid.');
-    return;
-  }
-
-  // 2. Obter o conteúdo do arquivo
-  const fileContent = editor.document.getText();
-  const fileName = path.basename(editor.document.fileName); // Precisamos do 'path'
-
-  // 3. Criar e mostrar o painel da webview
-  const panel = vscode.window.createWebviewPanel(
-    'mermaidPreview', // ID interno do painel
-    `Preview: ${fileName}`, // Título que aparece na aba
-    vscode.ViewColumn.Beside, // Abre o painel ao lado do editor atual
-    {
-      enableScripts: true // Habilita JavaScript na webview
-    }
-  );
-
-  // 4. Definir o conteúdo HTML da webview
-  panel.webview.html = getMermaidWebviewContent(fileContent, panel.webview, context.extensionUri);
+	context.subscriptions.push(showMermaidCommand);
 }
 
 // This method is called when your extension is deactivated
