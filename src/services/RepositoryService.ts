@@ -78,4 +78,8 @@ export function getWorkspaceFileList(dir: string = ".", baseDir: string = dir): 
   return fileList;
 }
 
+export function getWorkspaceFileString(dir: string = ".", baseDir: string = dir): string {
+
+  return getWorkspaceFileList(dir,baseDir).join("\n");
+}
 // console.log(getWorkspaceFileList("."));
