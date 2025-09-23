@@ -28,7 +28,7 @@ export async function streamChatResponse(prompt: string) {
  * @param sys_prompt Opcional. A instrução de sistema que guia o comportamento do modelo.
  * @returns Uma Promise que resolve para a string de conteúdo da resposta do assistente.
  */
-export async function chatResponse(prompt: string, sys_prompt? : string ) { //TODO: check if without async runs properly
+export async function chatResponse(prompt: string, sys_prompt? : string ) {
 
     const messages = [];
 
