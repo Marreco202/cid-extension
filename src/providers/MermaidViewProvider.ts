@@ -37,7 +37,7 @@ export class MermaidViewProvider {
     private showMermaidFile(fileContent : string, fileName? : string){
       // 3. Criar e mostrar o painel da webview
 
-      if(fileName === null){
+      if(fileName === undefined){
         fileName = "MockNameFile";
       }
 
