@@ -37,6 +37,10 @@
       {
         "command": "cid.explainSelectedCode",
         "title": "CID : Explain Selected Code"
+      },
+      {
+        "command": "cid.generateAndShowMermaid",
+        "title": "CID: Generate and Show Mermaid for Project"
       }
     ],
     "views": {

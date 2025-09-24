@@ -31,9 +31,13 @@ export function activate(context: vscode.ExtensionContext) {
 	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', () => {
 		chatProvider.createOrShow();
 	});
-
+	
 	const showMermaidCommand = vscode.commands.registerCommand('cid.renderMermaid', () => {
-		mermaidProvider.showMermaidPreview(context);
+		mermaidProvider.showMermaidPreview();
+	});
+
+	const generateAndShowMermaidCommand = vscode.commands.registerCommand('cid.generateAndShowMermaid', () => {
+		mermaidProvider.generateAndShowMermaidPreview();
 	});
 	
 	context.subscriptions.push(
@@ -50,6 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(chatCommand);
 	context.subscriptions.push(showMermaidCommand);
+	context.subscriptions.push(generateAndShowMermaidCommand);
 
 
 	context.subscriptions.push(
