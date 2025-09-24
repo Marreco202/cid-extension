@@ -12,9 +12,9 @@ async function generateMermaidString(prompt : string){
 
   //chamar o chat response 3x, usando o input de um como output do outro.
   
-  //const first_response = await chatResponse(prompt,BASE_SYSTEM_FIRST_PROMPT);
-  //const second_response = await chatResponse(first_response,BASE_SYSTEM_SECOND_PROMPT);
-  //const mermaid_string = await chatResponse(second_response,BASE_SYSTEM_THIRD_PROMPT);
+  const first_response = await chatResponse(prompt,BASE_SYSTEM_FIRST_PROMPT);
+  const second_response = await chatResponse(first_response,BASE_SYSTEM_SECOND_PROMPT);
+  const mermaid_string = await chatResponse(second_response,BASE_SYSTEM_THIRD_PROMPT);
   
   //uma vez gerado a string do .mermaid, salvar localmente (testar na propria path root desse provider mesmo)
   //adaptar salvar dentro da cache/armazenamento da Extensão
@@ -23,7 +23,7 @@ async function generateMermaidString(prompt : string){
   //const mock_mermaid = "Hello there!";
 
   //return mermaid_string;
-  return prompt;
+  return mermaid_string;
 }
 
 export class MermaidViewProvider {
