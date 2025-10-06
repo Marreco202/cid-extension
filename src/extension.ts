@@ -7,7 +7,8 @@ import { FunctionsTreeDataProvider } from './providers/FunctionsTreeDataProvider
 import {listWorkspaceFiles, explainCurrentFile,analyzePythonFiles} from './ExtractionFeatures'; //FIX: Change import to correct file name
 import {ChatViewProvider} from './providers/ChatViewProvider';
 import {MermaidViewProvider} from './providers/MermaidViewProvider';
-import {chatResponse} from './services/OllamaService';
+import {chatResponse, explainSelectedCode} from './services/OllamaService';
+import { setUncaughtExceptionCaptureCallback } from 'process';
 
 
 // This method is called when your extension is activated
@@ -52,47 +53,14 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('cid.analyzePythonFiles', analyzePythonFiles)
 	);
 	
+	context.subscriptions.push(
+    vscode.commands.registerCommand('cid.explainSelectedCode', explainSelectedCode)
+);
 	context.subscriptions.push(chatCommand);
 	context.subscriptions.push(showMermaidCommand);
 	context.subscriptions.push(generateAndShowMermaidCommand);
 
 
-	context.subscriptions.push(
-    vscode.commands.registerCommand('cid.explainSelectedCode', async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            return; // Nenhum editor aberto
-        }
-
-        const selectedCode = editor.document.getText(editor.selection);
-        if (!selectedCode) {
-            vscode.window.showInformationMessage('Por favor, selecione um trecho de código para explicar.');
-            return;
-        }
-
-        // Exemplo de uso COM um prompt de sistema
-        // const systemPrompt = "Você é um programador sênior especialista em explicar código de forma concisa. Responda em português.";
-        const systemPrompt = "You are a senior programmer specialist in explaining code in a concise way. Respond in english";
-
-        
-        vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "CID: Pensando...",
-            cancellable: false
-        }, async (progress) => {
-        
-            try {
-                const explanation = await chatResponse(selectedCode, systemPrompt);
-
-                // Mostra a resposta em uma nova janela de informação
-                vscode.window.showInformationMessage(explanation, { modal: true });
-
-            } catch (error: any) {
-                vscode.window.showErrorMessage(error.message);
-            }
-        });
-    })
-);
 }
 
 // This method is called when your extension is deactivated

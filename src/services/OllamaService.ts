@@ -1,4 +1,5 @@
 import ollama from 'ollama';
+import * as vscode from 'vscode';
 
 const OLLAMA_MODEL = 'deepseek-coder:1.3b';
 
@@ -52,4 +53,40 @@ export async function chatResponse(prompt: string, sys_prompt? : string ) {
         throw new Error("It wasn't possible to connect to Ollama. Verify if it's running properly");
     }
 
+}
+
+
+export async function explainSelectedCode() {
+    const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            return; // Nenhum editor aberto
+        }
+
+        const selectedCode = editor.document.getText(editor.selection);
+        if (!selectedCode) {
+            vscode.window.showInformationMessage('Por favor, selecione um trecho de código para explicar.');
+            return;
+        }
+
+        // Exemplo de uso COM um prompt de sistema
+        // const systemPrompt = "Você é um programador sênior especialista em explicar código de forma concisa. Responda em português.";
+        const systemPrompt = "You are a senior programmer specialist in explaining code in a concise way. Respond in english. Use at most 300 words.";
+
+        
+        vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "CID: Pensando...",
+            cancellable: false
+        }, async (progress) => {
+        
+            try {
+                const explanation = await chatResponse(selectedCode, systemPrompt);
+
+                // Mostra a resposta em uma nova janela de informação
+                vscode.window.showInformationMessage(explanation, { modal: true });
+
+            } catch (error: any) {
+                vscode.window.showErrorMessage(error.message);
+            }
+        });
 }
