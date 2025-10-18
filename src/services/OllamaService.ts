@@ -1,7 +1,11 @@
 import ollama from 'ollama';
 import * as vscode from 'vscode';
+import dotenv from 'dotenv';
+import * as path from 'path';
 
-const OLLAMA_MODEL = 'deepseek-coder:1.3b';
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? 'i like coffee :)';
 
 /**
  * 
@@ -19,7 +23,7 @@ export async function streamChatResponse(prompt: string) {
         return streamResponse;
     } catch (err) {
         console.error("Error connecting to Ollama: ", err);
-        throw new Error("It wasn't possible to connect to Ollama. Verify if it's running properly.");
+        throw new Error("It wasn't possible to connect to Ollama. Verify if it's running properly, or select model exists");
     }
 }
 
@@ -77,15 +81,23 @@ export async function explainSelectedCode() {
             location: vscode.ProgressLocation.Notification,
             title: "CID: Pensando...",
             cancellable: false
-        }, async (progress) => {
+        }, async (progress,token) => {
         
             try {
                 const explanation = await chatResponse(selectedCode, systemPrompt);
 
+                if (token.isCancellationRequested){
+                    return;
+                }
                 // Mostra a resposta em uma nova janela de informação
                 vscode.window.showInformationMessage(explanation, { modal: true });
 
             } catch (error: any) {
+                if(token.isCancellationRequested){
+                    console.log("Operação cancelada pelo usuário");
+                    return;
+                }
+
                 vscode.window.showErrorMessage(error.message);
             }
         });
