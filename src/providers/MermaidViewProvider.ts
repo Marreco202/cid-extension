@@ -54,7 +54,7 @@ export class MermaidViewProvider {
     public async generateAndShowMermaidPreviewMOCK() {
       await vscode.window.withProgress({
           location: vscode.ProgressLocation.Notification,
-          title: "CID: Gerando Diagrama Mermaid",
+          title: "[MOCK] Gerando Diagrama Mermaid",
           cancellable: true
       }, async (progress, token) => {
           try {
@@ -63,7 +63,7 @@ export class MermaidViewProvider {
 
               // Se a geração foi bem-sucedida (não foi cancelada), mostre o resultado.
               if (mermaidString) {
-                  this.showMermaidFile(mermaidString, "Diagrama do Projeto (Gerado por IA)");
+                  this.showMermaidFile(mermaidString, "[MOCK] Project diagram");
               }
 
           } catch (error: any) {
@@ -124,7 +124,7 @@ export class MermaidViewProvider {
     public async generateAndShowMermaidPreview() {
       await vscode.window.withProgress({
           location: vscode.ProgressLocation.Notification,
-          title: "CID: Gerando Diagrama Mermaid",
+          title: "Gerando Diagrama Mermaid",
           cancellable: true
       }, async (progress, token) => {
           try {
@@ -133,7 +133,7 @@ export class MermaidViewProvider {
 
               // Se a geração foi bem-sucedida (não foi cancelada), mostre o resultado.
               if (mermaidString) {
-                  this.showMermaidFile(mermaidString, "Diagrama do Projeto (Gerado por IA)");
+                  this.showMermaidFile(mermaidString, "Project Diagram"); //TODO colocar o nome do repositorio nesse titulo
               }
 
           } catch (error: any) {
