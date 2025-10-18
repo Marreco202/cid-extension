@@ -8,24 +8,6 @@ import {getWorkspaceFileString} from '../services/RepositoryService';
 
 import {BASE_SYSTEM_FIRST_PROMPT,BASE_SYSTEM_SECOND_PROMPT,BASE_SYSTEM_THIRD_PROMPT} from '../prompts/BaselineSysPrompt';
 
-async function generateMermaidString(prompt : string){
-
-  //chamar o chat response 3x, usando o input de um como output do outro.
-  
-  const first_response = await chatResponse(prompt,BASE_SYSTEM_FIRST_PROMPT);
-  const second_response = await chatResponse(first_response,BASE_SYSTEM_SECOND_PROMPT);
-  const mermaid_string = await chatResponse(second_response,BASE_SYSTEM_THIRD_PROMPT);
-  
-  //uma vez gerado a string do .mermaid, salvar localmente (testar na propria path root desse provider mesmo)
-  //adaptar salvar dentro da cache/armazenamento da Extensão
-  //Associar a extensão
-
-  //const mock_mermaid = "Hello there!";
-
-  //return mermaid_string;
-  return mermaid_string;
-}
-
 export class MermaidViewProvider {
 
     private readonly _context : vscode.ExtensionContext;
@@ -34,49 +16,106 @@ export class MermaidViewProvider {
         this._context = context;
     }
     
+
     private showMermaidFile(fileContent : string, fileName? : string){
-      // 3. Criar e mostrar o painel da webview
-
-      if(fileName === undefined){
-        fileName = "MockNameFile";
-      }
-
       const panel = vscode.window.createWebviewPanel(
-        'mermaidPreview', // ID interno do painel
-        `Preview: ${fileName}`, // Título que aparece na aba
-        vscode.ViewColumn.Beside, // Abre o painel ao lado do editor atual
+        'mermaidPreview', 
+        `Preview: ${fileName}`,
+        vscode.ViewColumn.Beside,
         {
-          enableScripts: true // Habilita JavaScript na webview
+          enableScripts: true,
+          localResourceRoots: [vscode.Uri.joinPath(this._context.extensionUri, 'node_modules')]
         }
       );
-      // 4. Definir o conteúdo HTML da webview
       panel.webview.html = getMermaidWebviewContent(fileContent, panel.webview, this._context.extensionUri);
-      
-      return;
     }
 
+    /**
+     * Mostra pré visualizção de um arquivo Mermaid já aberto no editor
+     * @param void
+     * @returns void
+     */
     async showMermaidPreview() {
-      // 1. Obter o editor de texto ativo
+
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
         vscode.window.showErrorMessage('Nenhum arquivo aberto para pré-visualizar como Mermaid.');
         return;
       }
-    
-      // 2. Obter o conteúdo do arquivo
       const fileContent = editor.document.getText();
       const fileName = path.basename(editor.document.fileName); // Precisamos do 'path'
     
       this.showMermaidFile(fileContent,fileName);
-
     }
-  async generateAndShowMermaidPreview(){
-
-    const workspace_files : string = await getWorkspaceFileString(); // get all files as string
-    const high_level_mermaid_graph : string = await generateMermaidString(workspace_files); //generates .mermaid file content
     
-    this.showMermaidFile(high_level_mermaid_graph);
+    /**
+     * Ponto de entrada principal para gerar o diagrama com feedback de progresso.
+     */
 
+    public async generateAndShowMermaidPreview() {
+      await vscode.window.withProgress({
+          location: vscode.ProgressLocation.Notification,
+          title: "CID: Gerando Diagrama Mermaid",
+          cancellable: true
+      }, async (progress, token) => {
+          try {
+              // Toda a lógica agora acontece aqui dentro.
+              const mermaidString = await this.generateMermaidString(progress, token);
+
+              // Se a geração foi bem-sucedida (não foi cancelada), mostre o resultado.
+              if (mermaidString) {
+                  this.showMermaidFile(mermaidString, "Diagrama do Projeto (Gerado por IA)");
+              }
+
+          } catch (error: any) {
+              // Se um erro ocorrer (incluindo cancelamento), mostre uma mensagem.
+              if (error.message === 'Cancelled') {
+                  vscode.window.showInformationMessage("Operação cancelada pelo usuário.");
+              } else {
+                  vscode.window.showErrorMessage(`Erro ao gerar diagrama: ${error.message}`);
+              }
+          }
+      });
   }
-}
 
+
+  private async generateMermaidString(progress : vscode.Progress<{message?: string; increment?: number}>, token: vscode.CancellationToken): Promise<string | null>{
+
+    const checkCancellation= () => {
+      if(token.isCancellationRequested) {
+        throw new Error("Cancelled");
+      }
+    };
+
+    //Trocar check cancellation por setTimeout
+
+    progress.report({ message: "Analisando workspace...", increment: 10 });
+    const workspaceFiles = await getWorkspaceFileString();
+    checkCancellation();
+
+    // Primeira chamada mock
+    progress.report({ message: "Gerando rascunho (1/3)...", increment: 30 });
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
+    // const first_response = await chatResponse(workspaceFiles, BASE_SYSTEM_FIRST_PROMPT);
+    checkCancellation();
+
+    // Segunda chamada mock
+    progress.report({ message: "Refinando estrutura (2/3)...", increment: 30 });
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
+    // const second_response = await chatResponse(first_response, BASE_SYSTEM_SECOND_PROMPT);
+    checkCancellation();
+
+    // Terceira chamada mock
+    progress.report({ message: "Finalizando código Mermaid (3/3)...", increment: 20 });
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
+    // const mermaid_string = await chatResponse(second_response, BASE_SYSTEM_THIRD_PROMPT);
+    const finalMermaidString = `graph TD;\n    A[Workspace] --> B{LLM Gen};\n    B --> C[Diagrama];`;
+    checkCancellation();
+
+    progress.report({ message: "Concluído!", increment: 10 });
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return finalMermaidString;
+  }
+
+}
