@@ -4,11 +4,11 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 import { FunctionsTreeDataProvider } from './providers/FunctionsTreeDataProvider';
-import {listWorkspaceFiles, explainCurrentFile,analyzePythonFiles} from './ExtractionFeatures'; //FIX: Change import to correct file name
+import { explainCurrentFile,analyzePythonFiles} from './ExtractionFeatures'; //FIX: Change import to correct file name
+import {RepoDataProvider} from './providers/RepoDataProvider';
 import {ChatViewProvider} from './providers/ChatViewProvider';
 import {MermaidViewProvider} from './providers/MermaidViewProvider';
 import {explainSelectedCode} from './services/OllamaService';
-import { setUncaughtExceptionCaptureCallback } from 'process';
 
 
 // This method is called when your extension is activated
@@ -27,6 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// Instancia o nosso provedor da view de chat
 	const chatProvider = new ChatViewProvider(context);
 	const mermaidProvider = new MermaidViewProvider(context);
+	const repoProvider = new RepoDataProvider();
 
 	// Registra o comando que simplesmente chama o método para mostrar a janela
 	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', () => {
@@ -46,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	
 	context.subscriptions.push(
-		vscode.commands.registerCommand('cid.listWorkspaceFiles', listWorkspaceFiles)
+		vscode.commands.registerCommand('cid.listWorkspaceFiles', repoProvider.getWorkspaceFileList)
 	);
 	
 	context.subscriptions.push(
