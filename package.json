@@ -39,6 +39,10 @@
         "title": "CID : Explain Selected Code"
       },
       {
+        "command": "cid.generateAndShowMermaidMOCK",
+        "title": "CID: Generate and Show Mermaid for Project - MOCK"
+      },
+      {
         "command": "cid.generateAndShowMermaid",
         "title": "CID: Generate and Show Mermaid for Project"
       }

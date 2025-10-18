@@ -7,7 +7,7 @@ import { FunctionsTreeDataProvider } from './providers/FunctionsTreeDataProvider
 import {listWorkspaceFiles, explainCurrentFile,analyzePythonFiles} from './ExtractionFeatures'; //FIX: Change import to correct file name
 import {ChatViewProvider} from './providers/ChatViewProvider';
 import {MermaidViewProvider} from './providers/MermaidViewProvider';
-import {chatResponse, explainSelectedCode} from './services/OllamaService';
+import {explainSelectedCode} from './services/OllamaService';
 import { setUncaughtExceptionCaptureCallback } from 'process';
 
 
@@ -37,6 +37,10 @@ export function activate(context: vscode.ExtensionContext) {
 		mermaidProvider.showMermaidPreview();
 	});
 
+	const generateAndShowMermaidCommandMOCK = vscode.commands.registerCommand('cid.generateAndShowMermaidMOCK', () => {
+		mermaidProvider.generateAndShowMermaidPreviewMOCK();
+	});
+
 	const generateAndShowMermaidCommand = vscode.commands.registerCommand('cid.generateAndShowMermaid', () => {
 		mermaidProvider.generateAndShowMermaidPreview();
 	});
@@ -58,6 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
 );
 	context.subscriptions.push(chatCommand);
 	context.subscriptions.push(showMermaidCommand);
+	context.subscriptions.push(generateAndShowMermaidCommandMOCK);
 	context.subscriptions.push(generateAndShowMermaidCommand);
 
 

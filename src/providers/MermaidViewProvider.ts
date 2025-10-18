@@ -49,9 +49,78 @@ export class MermaidViewProvider {
     }
     
     /**
-     * Ponto de entrada principal para gerar o diagrama com feedback de progresso.
+     * Ponto de entrada principal para gerar o diagrama com feedback de progresso. Versão mockada
      */
+    public async generateAndShowMermaidPreviewMOCK() {
+      await vscode.window.withProgress({
+          location: vscode.ProgressLocation.Notification,
+          title: "CID: Gerando Diagrama Mermaid",
+          cancellable: true
+      }, async (progress, token) => {
+          try {
+              // Toda a lógica agora acontece aqui dentro.
+              const mermaidString = await this.generateMermaidStringMOCK(progress, token);
 
+              // Se a geração foi bem-sucedida (não foi cancelada), mostre o resultado.
+              if (mermaidString) {
+                  this.showMermaidFile(mermaidString, "Diagrama do Projeto (Gerado por IA)");
+              }
+
+          } catch (error: any) {
+              // Se um erro ocorrer (incluindo cancelamento), mostre uma mensagem.
+              if (error.message === 'Cancelled') {
+                  vscode.window.showInformationMessage("Operação cancelada pelo usuário.");
+              } else {
+                  vscode.window.showErrorMessage(`Erro ao gerar diagrama: ${error.message}`);
+              }
+          }
+      });
+  }
+
+
+  private async generateMermaidStringMOCK(progress : vscode.Progress<{message?: string; increment?: number}>, token: vscode.CancellationToken): Promise<string | null>{
+
+    const checkCancellation= () => {
+      if(token.isCancellationRequested) {
+        throw new Error("Cancelled");
+      }
+    };
+
+    //Trocar check cancellation por setTimeout
+
+    progress.report({ message: "Analisando workspace...", increment: 10 });
+    const workspaceFiles = await getWorkspaceFileString();
+    checkCancellation();
+
+    // Primeira chamada mock
+    progress.report({ message: "Gerando rascunho (1/3)...", increment: 30 });
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
+    // const first_response = await chatResponse(workspaceFiles, BASE_SYSTEM_FIRST_PROMPT);
+    checkCancellation();
+
+    // Segunda chamada mock
+    progress.report({ message: "Refinando estrutura (2/3)...", increment: 30 });
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
+    // const second_response = await chatResponse(first_response, BASE_SYSTEM_SECOND_PROMPT);
+    checkCancellation();
+
+    // Terceira chamada mock
+    progress.report({ message: "Finalizando código Mermaid (3/3)...", increment: 20 });
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
+    // const mermaid_string = await chatResponse(second_response, BASE_SYSTEM_THIRD_PROMPT);
+    const finalMermaidString = `graph TD;\n    A[Workspace] --> B{LLM Gen};\n    B --> C[Diagrama];`;
+    checkCancellation();
+
+    progress.report({ message: "Concluído!", increment: 10 });
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return finalMermaidString;
+  }
+
+
+      /**
+     * Ponto de entrada principal para gerar o diagrama com feedback de progresso. Versão mockada
+     */
     public async generateAndShowMermaidPreview() {
       await vscode.window.withProgress({
           location: vscode.ProgressLocation.Notification,
@@ -95,21 +164,21 @@ export class MermaidViewProvider {
 
     // Primeira chamada mock
     progress.report({ message: "Gerando rascunho (1/3)...", increment: 30 });
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
-    // const first_response = await chatResponse(workspaceFiles, BASE_SYSTEM_FIRST_PROMPT);
+    // await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
+    const first_response = await chatResponse(workspaceFiles, BASE_SYSTEM_FIRST_PROMPT);
     checkCancellation();
 
     // Segunda chamada mock
     progress.report({ message: "Refinando estrutura (2/3)...", increment: 30 });
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
-    // const second_response = await chatResponse(first_response, BASE_SYSTEM_SECOND_PROMPT);
+    // await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
+    const second_response = await chatResponse(first_response, BASE_SYSTEM_SECOND_PROMPT);
     checkCancellation();
 
     // Terceira chamada mock
     progress.report({ message: "Finalizando código Mermaid (3/3)...", increment: 20 });
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
-    // const mermaid_string = await chatResponse(second_response, BASE_SYSTEM_THIRD_PROMPT);
-    const finalMermaidString = `graph TD;\n    A[Workspace] --> B{LLM Gen};\n    B --> C[Diagrama];`;
+    // await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
+    const finalMermaidString = await chatResponse(second_response, BASE_SYSTEM_THIRD_PROMPT);
+    // const finalMermaidString = `graph TD;\n    A[Workspace] --> B{LLM Gen};\n    B --> C[Diagrama];`;
     checkCancellation();
 
     progress.report({ message: "Concluído!", increment: 10 });
