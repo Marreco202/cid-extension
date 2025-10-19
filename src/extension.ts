@@ -8,6 +8,8 @@ import {RepoDataProvider} from './providers/RepoDataProvider';
 import {ChatViewProvider} from './providers/ChatViewProvider';
 import {MermaidViewProvider} from './providers/MermaidViewProvider';
 import {explainSelectedCode} from './services/OllamaService';
+// import { GeminiService } from './services/GeminiService.mjs';
+import { IModelRequestData } from './interfaces/IModelRequestData';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -47,7 +49,16 @@ export function activate(context: vscode.ExtensionContext) {
 	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
 		try {
 			const mod = await import('./services/GeminiService.mjs');
-			await mod.testingGemini();
+
+			const data  = {
+				file_tree : "lalala",
+				readme : "CID!"
+			};
+
+			const obj = new mod.GeminiService("gemini-2.5-flash",data);
+
+			await obj.generateResponse("What is the meaning of life?");
+
 		} catch (err) {
 			console.error('Failed to load/run Gemini test:', err);
 			vscode.window.showErrorMessage('Failed to run Gemini test. See console for details.');
