@@ -1,7 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as path from 'path';
 
 import { FunctionsTreeDataProvider } from './providers/FunctionsTreeDataProvider';
 import { explainCurrentFile,analyzePythonFiles} from './ExtractionFeatures'; //FIX: Change import to correct file name
@@ -9,7 +8,6 @@ import {RepoDataProvider} from './providers/RepoDataProvider';
 import {ChatViewProvider} from './providers/ChatViewProvider';
 import {MermaidViewProvider} from './providers/MermaidViewProvider';
 import {explainSelectedCode} from './services/OllamaService';
-
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -46,6 +44,16 @@ export function activate(context: vscode.ExtensionContext) {
 		mermaidProvider.generateAndShowMermaidPreview();
 	});
 	
+	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
+		try {
+			const mod = await import('./services/GeminiService.mjs');
+			await mod.testingGemini();
+		} catch (err) {
+			console.error('Failed to load/run Gemini test:', err);
+			vscode.window.showErrorMessage('Failed to run Gemini test. See console for details.');
+		}
+	});
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand('cid.listWorkspaceFiles', repoProvider.getWorkspaceFileList)
 	);
@@ -65,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(showMermaidCommand);
 	context.subscriptions.push(generateAndShowMermaidCommandMOCK);
 	context.subscriptions.push(generateAndShowMermaidCommand);
-
+	context.subscriptions.push(testingGeminiCommand);
 
 }
 
