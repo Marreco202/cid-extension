@@ -2,10 +2,14 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-
 import { FunctionsTreeDataProvider } from './providers/FunctionsTreeDataProvider';
-import {listWorkspaceFiles, explainCurrentFile,analyzePythonFiles} from './ExtractionFeatures'; //FIX: Change import to correct file name
+import { explainCurrentFile,analyzePythonFiles} from './ExtractionFeatures'; //FIX: Change import to correct file name
+import {RepoDataProvider} from './providers/RepoDataProvider';
 import {ChatViewProvider} from './providers/ChatViewProvider';
+import {MermaidViewProvider} from './providers/MermaidViewProvider';
+import {explainSelectedCode} from './services/OllamaService';
+// import { GeminiService } from './services/GeminiService.mjs';
+import { IModelRequestData } from './interfaces/IModelRequestData';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -20,17 +24,49 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "cid" is now active!');
 	vscode.window.showInformationMessage('Hello World from CID!');
 
-	
 	// Instancia o nosso provedor da view de chat
 	const chatProvider = new ChatViewProvider(context);
+	const mermaidProvider = new MermaidViewProvider(context);
+	const repoProvider = new RepoDataProvider();
 
 	// Registra o comando que simplesmente chama o método para mostrar a janela
 	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', () => {
 		chatProvider.createOrShow();
 	});
 	
+	const showMermaidCommand = vscode.commands.registerCommand('cid.renderMermaid', () => {
+		mermaidProvider.showMermaidPreview();
+	});
+
+	const generateAndShowMermaidCommandMOCK = vscode.commands.registerCommand('cid.generateAndShowMermaidMOCK', () => {
+		mermaidProvider.generateAndShowMermaidPreviewMOCK();
+	});
+
+	const generateAndShowMermaidCommand = vscode.commands.registerCommand('cid.generateAndShowMermaid', () => {
+		mermaidProvider.generateAndShowMermaidPreview();
+	});
+	
+	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
+		try {
+			const mod = await import('./services/GeminiService.mjs');
+
+			const data  = {
+				file_tree : "lalala",
+				readme : "CID!"
+			};
+
+			const obj = new mod.GeminiService("gemini-2.5-flash",data);
+
+			await obj.generateResponse("What is the meaning of life?");
+
+		} catch (err) {
+			console.error('Failed to load/run Gemini test:', err);
+			vscode.window.showErrorMessage('Failed to run Gemini test. See console for details.');
+		}
+	});
+
 	context.subscriptions.push(
-		vscode.commands.registerCommand('cid.listWorkspaceFiles', listWorkspaceFiles)
+		vscode.commands.registerCommand('cid.listWorkspaceFiles', repoProvider.getWorkspaceFileList)
 	);
 	
 	context.subscriptions.push(
@@ -41,7 +77,15 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('cid.analyzePythonFiles', analyzePythonFiles)
 	);
 	
+	context.subscriptions.push(
+    vscode.commands.registerCommand('cid.explainSelectedCode', explainSelectedCode)
+);
 	context.subscriptions.push(chatCommand);
+	context.subscriptions.push(showMermaidCommand);
+	context.subscriptions.push(generateAndShowMermaidCommandMOCK);
+	context.subscriptions.push(generateAndShowMermaidCommand);
+	context.subscriptions.push(testingGeminiCommand);
+
 }
 
 // This method is called when your extension is deactivated
