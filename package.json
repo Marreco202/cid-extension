@@ -29,43 +29,60 @@
       {
         "command": "cid.analyzePythonFiles",
         "title": "CID : List all functions on project"
+      },
+      {
+        "command": "cid.renderMermaid",
+        "title": "CID : Render Mermaid File on Webview"
+      },
+      {
+        "command": "cid.explainSelectedCode",
+        "title": "CID : Explain Selected Code"
+      },
+      {
+        "command": "cid.generateAndShowMermaidMOCK",
+        "title": "CID: Generate and Show Mermaid for Project - MOCK"
+      },
+      {
+        "command": "cid.generateAndShowMermaid",
+        "title": "CID: Generate and Show Mermaid for Project"
+      },
+      {
+        "command": "cid.testingGemini",
+        "title": "CID: Test Gemini Connection"
       }
     ],
     "views": {
       "cid-container": [
         {
-          "id" : "cid.functionsView",
-          "name" : "Funções CID",
+          "id": "cid.functionsView",
+          "name": "Funções CID",
           "icon": "media/smile.svg"
         }
       ]
     },
-
     "menus": {
       "view/title": [
         {
           "command": "cid.helloWorld",
           "when": "view === cid.functionsView",
-          "group" : "navigation"
+          "group": "navigation"
         }
       ]
     },
-
     "viewsContainers": {
       "activitybar": [
         {
-          "id" : "cid-container",
-          "title" : "CID Assistant",
-          "icon" : "media/smile.svg"
+          "id": "cid-container",
+          "title": "CID Assistant",
+          "icon": "media/smile.svg"
         }
       ]
     },
-
-    "activities" : {
-      "id" : "cid-activity",
-      "viewsContainersId" : "cid-container",
-      "title" : "CID Assistant",
-      "icon" : "media/icon.svg"
+    "activities": {
+      "id": "cid-activity",
+      "viewsContainersId": "cid-container",
+      "title": "CID Assistant",
+      "icon": "media/icon.svg"
     }
   },
   "scripts": {
@@ -88,6 +105,10 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@google/genai": "^1.25.0",
+    "@panzoom/panzoom": "^4.6.0",
+    "dotenv": "^17.2.3",
+    "mermaid": "^11.12.0",
     "ollama": "^0.5.16"
   }
 }
