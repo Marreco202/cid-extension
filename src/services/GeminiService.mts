@@ -35,7 +35,7 @@ export class GeminiService implements IModel {
 
       // Extract the text content from the response
       const text = response.text ?? response.outputText ?? response.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-      //console.log(text);
+      console.log(text);
       return text;
 
     } catch (err) {

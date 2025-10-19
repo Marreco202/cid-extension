@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 import {} from '../services/RepositoryService';
-import {getMermaidWebviewContent} from '../WebViews';
+import {getMermaidWebviewContent} from '../webViews';
 import {chatResponse} from '../services/OllamaService';
 import {getWorkspaceFileString} from '../services/RepositoryService';
 

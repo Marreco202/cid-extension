@@ -8,8 +8,8 @@ import {RepoDataProvider} from './providers/RepoDataProvider';
 import {ChatViewProvider} from './providers/ChatViewProvider';
 import {MermaidViewProvider} from './providers/MermaidViewProvider';
 import {explainSelectedCode} from './services/OllamaService';
-// import { GeminiService } from './services/GeminiService.mjs';
-import { IModelRequestData } from './interfaces/IModelRequestData';
+
+import { ModelProvider } from './providers/ModelProvider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -28,6 +28,15 @@ export function activate(context: vscode.ExtensionContext) {
 	const chatProvider = new ChatViewProvider(context);
 	const mermaidProvider = new MermaidViewProvider(context);
 	const repoProvider = new RepoDataProvider();
+	const modelProvider = new ModelProvider();
+
+	//Repository Data
+	const repoData  = {
+				file_tree : "lalala", //TODO : trocar para chamada da função que pega o file_tree do projeto. Fazer com que seja um singleton. (caso ja tenha extraido tudo, nao precisa rodar dnv)
+				readme : "CID!" //TODO : criar e colocar a chamada da função que coloca o readme do projeto aqui como contexto (tambem fazer singleton)
+			};
+
+	const selectedModel = "Gemini";
 
 	// Registra o comando que simplesmente chama o método para mostrar a janela
 	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', () => {
@@ -48,16 +57,9 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
 		try {
-			const mod = await import('./services/GeminiService.mjs');
 
-			const data  = {
-				file_tree : "lalala",
-				readme : "CID!"
-			};
-
-			const obj = new mod.GeminiService("gemini-2.5-flash",data);
-
-			await obj.generateResponse("What is the meaning of life?");
+			const model_instance = await new ModelProvider().factory("Gemini",repoData);
+			model_instance.generateResponse("What is the meaning of life? Use 50 words max");
 
 		} catch (err) {
 			console.error('Failed to load/run Gemini test:', err);
