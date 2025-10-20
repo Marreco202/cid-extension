@@ -3,11 +3,11 @@
 import * as vscode from 'vscode';
 
 import { FunctionsTreeDataProvider } from './providers/FunctionsTreeDataProvider';
-import { explainCurrentFile,analyzePythonFiles} from './ExtractionFeatures'; //FIX: Change import to correct file name
+import { explainCurrentFile,analyzePythonFiles} from './extractionFeatures'; //FIX: Change import to correct file name
 import {RepoDataProvider} from './providers/RepoDataProvider';
 import {ChatViewProvider} from './providers/ChatViewProvider';
 import {MermaidViewProvider} from './providers/MermaidViewProvider';
-import {explainSelectedCode} from './services/OllamaService';
+// import {explainSelectedCode} from './services/OllamaService';
 
 import { ModelProvider } from './providers/ModelProvider';
 
@@ -37,10 +37,18 @@ export function activate(context: vscode.ExtensionContext) {
 			};
 
 	const selectedModel = "Gemini";
+	const model = modelProvider.factory(selectedModel,repoData);
 
 	// Registra o comando que simplesmente chama o método para mostrar a janela
-	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', () => {
-		chatProvider.createOrShow();
+	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', async () => {
+		try {
+			const resolvedModel = await model;
+			chatProvider.createOrShow(resolvedModel);
+		}catch (err){
+			console.error("Failed to execute chat command:", err);
+        	vscode.window.showErrorMessage("Failed to open chat view. Please try again.");
+		}
+
 	});
 	
 	const showMermaidCommand = vscode.commands.registerCommand('cid.renderMermaid', () => {
@@ -51,8 +59,8 @@ export function activate(context: vscode.ExtensionContext) {
 		mermaidProvider.generateAndShowMermaidPreviewMOCK();
 	});
 
-	const generateAndShowMermaidCommand = vscode.commands.registerCommand('cid.generateAndShowMermaid', () => {
-		mermaidProvider.generateAndShowMermaidPreview();
+	const generateAndShowMermaidCommand = vscode.commands.registerCommand('cid.generateAndShowMermaid', async () => {
+		mermaidProvider.generateAndShowMermaidPreview(await model);
 	});
 	
 	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
@@ -79,9 +87,9 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('cid.analyzePythonFiles', analyzePythonFiles)
 	);
 	
-	context.subscriptions.push(
-    vscode.commands.registerCommand('cid.explainSelectedCode', explainSelectedCode)
-);
+// 	context.subscriptions.push(
+//     vscode.commands.registerCommand('cid.explainSelectedCode', model.explainSelectedCode) //Esse comando sempre da erro quando o modelo selecionado nao for o Olama. BUG FIX
+// );
 	context.subscriptions.push(chatCommand);
 	context.subscriptions.push(showMermaidCommand);
 	context.subscriptions.push(generateAndShowMermaidCommandMOCK);

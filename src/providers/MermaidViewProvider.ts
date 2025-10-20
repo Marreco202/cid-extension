@@ -3,10 +3,10 @@ import * as path from 'path';
 
 import {} from '../services/RepositoryService';
 import {getMermaidWebviewContent} from '../webViews';
-import {chatResponse} from '../services/OllamaService';
 import {getWorkspaceFileString} from '../services/RepositoryService';
 
 import {BASE_SYSTEM_FIRST_PROMPT,BASE_SYSTEM_SECOND_PROMPT,BASE_SYSTEM_THIRD_PROMPT} from '../prompts/BaselineSysPrompt';
+import { IModel } from '../interfaces/IModel';
 
 export class MermaidViewProvider {
 
@@ -117,43 +117,42 @@ export class MermaidViewProvider {
     return finalMermaidString;
   }
 
+    /**
+   * Ponto de entrada principal para gerar o diagrama com feedback de progresso
+   */
+  public async generateAndShowMermaidPreview(model : IModel) {
+    await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "Gerando Diagrama Mermaid",
+        cancellable: true
+    }, async (progress, token) => {
+        try {
+            // Toda a lógica agora acontece aqui dentro.
+            const mermaidString = await this.generateMermaidString(progress, token, model);
 
-      /**
-     * Ponto de entrada principal para gerar o diagrama com feedback de progresso
-     */
-    public async generateAndShowMermaidPreview() {
-      await vscode.window.withProgress({
-          location: vscode.ProgressLocation.Notification,
-          title: "Gerando Diagrama Mermaid",
-          cancellable: true
-      }, async (progress, token) => {
-          try {
-              // Toda a lógica agora acontece aqui dentro.
-              const mermaidString = await this.generateMermaidString(progress, token);
+            if (token.isCancellationRequested) {
+              // console.log("Graph generation cancelled by user.");
+              throw new Error("Cancelled");
+            }
 
-              if (token.isCancellationRequested) {
-                // console.log("Graph generation cancelled by user.");
-                throw new Error("Cancelled");
-              }
+            // Se a geração foi bem-sucedida (não foi cancelada), mostre o resultado.
+            if (mermaidString) {
+                this.showMermaidFile(mermaidString, "Project Diagram"); //TODO colocar o nome do repositorio nesse titulo
+            }
 
-              // Se a geração foi bem-sucedida (não foi cancelada), mostre o resultado.
-              if (mermaidString) {
-                  this.showMermaidFile(mermaidString, "Project Diagram"); //TODO colocar o nome do repositorio nesse titulo
-              }
-
-          } catch (error: any) {
-              if(token.isCancellationRequested){
-                vscode.window.showErrorMessage(`Graph generation cancelled by user: ${error.message}`);
-              }
-              else if (!token.isCancellationRequested) {
-                vscode.window.showErrorMessage(`Error while generating diagram: ${error.message}`);
-              }
-          }
-      });
+        } catch (error: any) {
+            if(token.isCancellationRequested){
+              vscode.window.showErrorMessage(`Graph generation cancelled by user: ${error.message}`);
+            }
+            else if (!token.isCancellationRequested) {
+              vscode.window.showErrorMessage(`Error while generating diagram: ${error.message}`);
+            }
+        }
+    });
   }
 
 
-  private async generateMermaidString(progress : vscode.Progress<{message?: string; increment?: number}>, token: vscode.CancellationToken): Promise<string | null>{
+  private async generateMermaidString(progress : vscode.Progress<{message?: string; increment?: number}>, token: vscode.CancellationToken, model : IModel): Promise<string | null>{
 
     progress.report({ message: "Analisando workspace...", increment: 10 });
     const workspaceFiles = await getWorkspaceFileString();
@@ -161,21 +160,20 @@ export class MermaidViewProvider {
 
     // Primeira chamada mock
     progress.report({ message: "Gerando rascunho (1/3)...", increment: 30 });
-    // await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
-    const first_response = await chatResponse(workspaceFiles, BASE_SYSTEM_FIRST_PROMPT);
+    model.setData({instructions: BASE_SYSTEM_FIRST_PROMPT});
+    const first_response = await model.generateResponse(workspaceFiles);
     if (token.isCancellationRequested) { return ""; };
 
     // Segunda chamada mock
     progress.report({ message: "Refinando estrutura (2/3)...", increment: 30 });
-    // await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
-    const second_response = await chatResponse(first_response, BASE_SYSTEM_SECOND_PROMPT);
+
+    model.setData({instructions: BASE_SYSTEM_SECOND_PROMPT});
+    const second_response = await model.generateResponse(first_response);
     if (token.isCancellationRequested) { return ""; };
 
     // Terceira chamada mock
     progress.report({ message: "Finalizando código Mermaid (3/3)...", increment: 20 });
-    // await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
-    const finalMermaidString = await chatResponse(second_response, BASE_SYSTEM_THIRD_PROMPT);
-    // const finalMermaidString = `graph TD;\n    A[Workspace] --> B{LLM Gen};\n    B --> C[Diagrama];`;
+    const finalMermaidString = await model.generateResponse(second_response);
     if (token.isCancellationRequested) { return ""; };
 
     progress.report({ message: "Concluído!", increment: 10 });

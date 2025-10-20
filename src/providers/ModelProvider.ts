@@ -5,6 +5,7 @@
 
 import { IModel } from '../interfaces/IModel';
 import { IModelRequestData } from '../interfaces/IModelRequestData';
+import { OllamaService } from '../services/OllamaService';
 
 
 export class ModelProvider{
@@ -16,6 +17,11 @@ export class ModelProvider{
             const modelInstance = new mod.GeminiService(modelName,data);
             return modelInstance;
         }
+
+        else if(LLM_model === "Ollama"){
+            return new OllamaService(data);
+        }
+        
         throw new Error(`Unsupported model type: ${LLM_model}`);
         //Colocar Ollama aqui depois
 

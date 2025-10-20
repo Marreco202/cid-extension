@@ -4,21 +4,23 @@ import { IModelRequestData } from "../interfaces/IModelRequestData.js";
 
 export class GeminiService implements IModel {
   
-  private model : string
+  private model_name : string;
+  private model_type : string;
   private data : Partial<IModelRequestData>;
   private API_KEY : string;
   private googleGenAI : any;
   private mod : any;
 
   constructor(model: string, data: Partial<IModelRequestData>) {
-    this.model = model;
+    this.model_name = model;
+    this.model_type = "Gemini";
     this.data = data; 
 
     const API_KEY = process.env.GOOGLE_API_KEY; // set this in your environment
     
     if (!API_KEY) {
-      console.error("Missing GOOGLE_API_KEY environment variable");
-      process.exit(1); //TODO : revisar isso. Verificar se não pode gerar crashes inesperados
+      // console.error("Missing GOOGLE_API_KEY environment variable");
+      throw new Error("Missing GOOGLE_API_KEY environment variable");
     }
     
     this.googleGenAI = new GoogleGenAI({ apiKey: API_KEY });
@@ -26,10 +28,10 @@ export class GeminiService implements IModel {
 
   }
 
-  async generateResponse(prompt: string): Promise<string> {
+  async generateResponse(prompt: string): Promise<string> { //TODO : needs to implement data!!!
     try {
       const response = await this.googleGenAI.models.generateContent({
-        model: this.model,
+        model: this.model_name,
         contents: prompt,
       });
 
@@ -58,7 +60,26 @@ export class GeminiService implements IModel {
       // console.log(response.text ?? response.outputText ?? response[0]?.content);
     } catch (err) {
       console.error("Gemini request failed:", err);
-      process.exitCode = 1; //TODO : verificar consequencias
+    }
+  }
+
+
+  async streamChatResponse(prompt: string) {
+
+    try {
+        const streamResponse = await this.googleGenAI.models.generateContentStream({
+            model : this.model_name,
+            contents : [{
+              role : "user",
+              parts : [{text : prompt}],
+            },
+          ],
+            // contents : [{role: "user", content: prompt}],
+        });
+        return streamResponse;
+    } catch (err) {
+        console.error("Error connecting to Gemini: ", err);
+        throw new Error("It wasn't possible to connect to Gemini");
     }
   }
   
@@ -66,4 +87,7 @@ export class GeminiService implements IModel {
     this.data = data;
   }
   
+  getModelName(): string { //TODO : trocar para model type
+    return this.model_type;
+  }
 }
