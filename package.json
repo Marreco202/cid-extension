@@ -35,10 +35,6 @@
         "title": "CID : Render Mermaid File on Webview"
       },
       {
-        "command": "cid.explainSelectedCode",
-        "title": "CID : Explain Selected Code"
-      },
-      {
         "command": "cid.generateAndShowMermaidMOCK",
         "title": "CID: Generate and Show Mermaid for Project - MOCK"
       },
