@@ -6,6 +6,8 @@ import {getWorkspaceFileString, findReadmeFile} from '../services/RepositoryServ
 
 import {BASE_SYSTEM_FIRST_PROMPT,BASE_SYSTEM_SECOND_PROMPT,BASE_SYSTEM_THIRD_PROMPT} from '../prompts/BaselineSysPrompt';
 import { IModel } from '../interfaces/IModel';
+import { read } from 'fs';
+import { execPath } from 'process';
 
 export class MermaidViewProvider {
 
@@ -155,33 +157,52 @@ export class MermaidViewProvider {
 
     const file_tree = await getWorkspaceFileString('.');
     const read_me = await findReadmeFile();
-
+    
     progress.report({ message: "Analisando workspace...", increment: 10 });
     const workspaceFiles = await getWorkspaceFileString();
     if (token.isCancellationRequested) { return ""; }
+    
+    //STEP ONE: EXPLANATION
 
-    // Primeira chamada mock
+    const first_prompt_data = {
+      file_tree : file_tree,
+      read_me : read_me
+    };
+
     progress.report({ message: "Gerando explicação (1/3)...", increment: 30 });
-    model.setData({instructions: BASE_SYSTEM_FIRST_PROMPT});
-    const first_response = await model.generateResponse(workspaceFiles);
+    model.setData(first_prompt_data);
+    const explanation = await model.generateResponse(BASE_SYSTEM_FIRST_PROMPT);
     if (token.isCancellationRequested) { return ""; };
 
-    // Segunda chamada mock
-    progress.report({ message: "Refinando estrutura (2/3)...", increment: 30 });
+    //STEP TWO : CONTENT_MAPPING
 
-    model.setData({instructions: BASE_SYSTEM_SECOND_PROMPT});
-    const second_response = await model.generateResponse(first_response);
+    const second_prompt_data = {
+      explanation: explanation,
+      file_tree: file_tree
+    };
+
+    progress.report({ message: "Gerando Content Mapping (2/3)...", increment: 30 });
+    model.setData(second_prompt_data);
+    const content_mapping = await model.generateResponse(BASE_SYSTEM_SECOND_PROMPT);
     if (token.isCancellationRequested) { return ""; };
 
-    // Terceira chamada mock
+    // STEP THREE: .MERMAID FILE
+
+    const third_prompt_data = {
+      explanation: explanation,
+      content_mapping: content_mapping
+    };
+
     progress.report({ message: "Finalizando código Mermaid (3/3)...", increment: 20 });
-    const finalMermaidString = await model.generateResponse(second_response);
+    model.setData(third_prompt_data);
+    const finalMermaidString = await model.generateResponse(BASE_SYSTEM_THIRD_PROMPT);
     if (token.isCancellationRequested) { return ""; };
 
     progress.report({ message: "Concluído!", increment: 10 });
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+    console.log("\n\n\nFINAL MERMAID!\n\n\n");
+    console.log(finalMermaidString);
+
     return finalMermaidString;
   }
-
 }
