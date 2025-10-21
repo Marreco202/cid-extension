@@ -45,6 +45,10 @@
       {
         "command": "cid.testingGemini",
         "title": "CID: Test Gemini Connection"
+      },
+      {
+        "command": "cid.printReadMe",
+        "title": "CID: Find and Console Log README.md"
       }
     ],
     "views": {

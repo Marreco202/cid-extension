@@ -62,6 +62,10 @@ export function activate(context: vscode.ExtensionContext) {
 	const generateAndShowMermaidCommand = vscode.commands.registerCommand('cid.generateAndShowMermaid', async () => {
 		mermaidProvider.generateAndShowMermaidPreview(await model);
 	});
+
+	const consolelogReadmeCommand = vscode.commands.registerCommand("cid.printReadMe", async () => {
+		repoProvider.getReadme();
+	});
 	
 	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
 		try {
@@ -95,6 +99,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(generateAndShowMermaidCommandMOCK);
 	context.subscriptions.push(generateAndShowMermaidCommand);
 	context.subscriptions.push(testingGeminiCommand);
+	context.subscriptions.push(consolelogReadmeCommand);
 
 }
 

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import {getWorkspaceFileString} from '../services/RepositoryService';
+import {findReadmeFile, getWorkspaceFileString} from '../services/RepositoryService';
+import { read } from 'fs';
 
 export class RepoDataProvider {
 
@@ -10,5 +11,11 @@ export class RepoDataProvider {
         promise.then((data) =>{
             console.log(data);
         });
+    }
+
+    async getReadme() {
+        const readme = await findReadmeFile();
+        console.log(readme);
+        return readme;
     }
 }
