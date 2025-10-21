@@ -133,7 +133,7 @@ export async function findReadmeFile(): Promise<string | undefined> {
 
       if (rootFiles.length > 0) {
         const readmeUri = rootFiles[0];
-        console.log(`Found README.md at root: ${readmeUri.fsPath}`);
+        // console.log(`Found README.md at root: ${readmeUri.fsPath}`);
         const content = await vscode.workspace.fs.readFile(readmeUri);
         return new TextDecoder("utf-8").decode(content);
       }
@@ -149,7 +149,7 @@ export async function findReadmeFile(): Promise<string | undefined> {
     }
 
     const readmeUri = files[0];
-    console.log(`Found README.md recursively: ${readmeUri.fsPath}`);
+    // console.log(`Found README.md recursively: ${readmeUri.fsPath}`);
     const content = await vscode.workspace.fs.readFile(readmeUri);
     return new TextDecoder("utf-8").decode(content);
   } catch (err) {
