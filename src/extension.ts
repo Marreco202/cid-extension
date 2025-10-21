@@ -31,13 +31,15 @@ export function activate(context: vscode.ExtensionContext) {
 	const modelProvider = new ModelProvider();
 
 	//Repository Data
-	const repoData  = {
-				file_tree : "lalala", //TODO : trocar para chamada da função que pega o file_tree do projeto. Fazer com que seja um singleton. (caso ja tenha extraido tudo, nao precisa rodar dnv)
-				readme : "CID!" //TODO : criar e colocar a chamada da função que coloca o readme do projeto aqui como contexto (tambem fazer singleton)
-			};
+	// const repoData  = {
+	// 			file_tree : repoProvider.getWorkspaceFileList(),
+	// 			readme : repoProvider.getReadme() 
+	// 		};
 
 	const selectedModel = "Gemini";
-	const model = modelProvider.factory(selectedModel,repoData);
+	const model = modelProvider.factory(selectedModel);
+	// const model = modelProvider.factory(selectedModel,repoData);
+
 
 	// Registra o comando que simplesmente chama o método para mostrar a janela
 	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', async () => {
@@ -70,7 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
 		try {
 
-			const model_instance = await new ModelProvider().factory("Gemini",repoData);
+			const model_instance = await new ModelProvider().factory("Gemini");
 			model_instance.generateResponse("What is the meaning of life? Use 50 words max");
 
 		} catch (err) {

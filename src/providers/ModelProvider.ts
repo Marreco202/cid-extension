@@ -10,7 +10,7 @@ import { OllamaService } from '../services/OllamaService';
 
 export class ModelProvider{
     //Factory method
-    async factory (LLM_model : string, data: IModelRequestData) : Promise<IModel> {
+    async factory (LLM_model : string, data?: IModelRequestData) : Promise<IModel> {
         if(LLM_model === "Gemini"){
             const mod =  await import('../services/GeminiService.mjs');
             const modelName = "gemini-2.5-flash";

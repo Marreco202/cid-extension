@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-import {} from '../services/RepositoryService';
 import {getMermaidWebviewContent} from '../webViews';
-import {getWorkspaceFileString} from '../services/RepositoryService';
+import {getWorkspaceFileString, findReadmeFile} from '../services/RepositoryService';
 
 import {BASE_SYSTEM_FIRST_PROMPT,BASE_SYSTEM_SECOND_PROMPT,BASE_SYSTEM_THIRD_PROMPT} from '../prompts/BaselineSysPrompt';
 import { IModel } from '../interfaces/IModel';
@@ -154,12 +153,15 @@ export class MermaidViewProvider {
 
   private async generateMermaidString(progress : vscode.Progress<{message?: string; increment?: number}>, token: vscode.CancellationToken, model : IModel): Promise<string | null>{
 
+    const file_tree = await getWorkspaceFileString('.');
+    const read_me = await findReadmeFile();
+
     progress.report({ message: "Analisando workspace...", increment: 10 });
     const workspaceFiles = await getWorkspaceFileString();
     if (token.isCancellationRequested) { return ""; }
 
     // Primeira chamada mock
-    progress.report({ message: "Gerando rascunho (1/3)...", increment: 30 });
+    progress.report({ message: "Gerando explicação (1/3)...", increment: 30 });
     model.setData({instructions: BASE_SYSTEM_FIRST_PROMPT});
     const first_response = await model.generateResponse(workspaceFiles);
     if (token.isCancellationRequested) { return ""; };

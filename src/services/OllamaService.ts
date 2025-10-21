@@ -11,13 +11,16 @@ export class OllamaService implements IModel{
 
     private model_name : string;
     private model_type : string;
-    private data : Partial<IModelRequestData>;
+    private data ?: Partial<IModelRequestData>;
 
 
-    constructor(data : Partial<IModelRequestData>, model ?: string) {
+    constructor(data ?: Partial<IModelRequestData>, model ?: string) {
         this.model_name = process.env.OLLAMA_MODEL ?? model ?? 'i like coffee :)';
         this.model_type = "Ollama";
-        this.data = data;
+        
+        if(data){
+          this.data = data;  
+        } 
     }
 
     /**
@@ -35,10 +38,8 @@ export class OllamaService implements IModel{
         
         const messages = [];
 
-        const sys_prompt = this.data.instructions;
-
-        if(sys_prompt){
-            messages.push({role: 'system', content: sys_prompt});
+        if(this.data?.instructions){
+            messages.push({role: 'system', content: this.data.instructions}); //In this context, instructions == sys_prompt
         }
 
         messages.push({role: 'user', content: prompt});
