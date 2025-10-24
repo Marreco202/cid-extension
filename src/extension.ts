@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// 			readme : repoProvider.getReadme() 
 	// 		};
 
-	const selectedModel = "GPT";
+	const selectedModel = "Gemini";
 	const model = modelProvider.factory(selectedModel);
 	// const model = modelProvider.factory(selectedModel,repoData);
 

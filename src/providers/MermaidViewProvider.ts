@@ -8,6 +8,7 @@ import {BASE_SYSTEM_FIRST_PROMPT,BASE_SYSTEM_SECOND_PROMPT,BASE_SYSTEM_THIRD_PRO
 import { IModel } from '../interfaces/IModel';
 import { read } from 'fs';
 import { execPath } from 'process';
+import { GEMINI_CORRECT_MERMAID } from '../prompts/GeminiPrompts';
 
 export class MermaidViewProvider {
 
@@ -221,6 +222,15 @@ export class MermaidViewProvider {
     .replace(/```mermaid/g, '')
     .replace(/```/g, '')
     .trim();
+
+
+    if(model.getModelName() === "Gemini") {
+      console.log("CORRECTING GEMINI...");
+      model.setData({
+        possiblyBrokenMermaid : finalMermaidString
+      });
+      finalMermaidString = await model.generateResponse(GEMINI_CORRECT_MERMAID);
+    }
 
     if (!sanitizedMermaid.startsWith("graph") && !sanitizedMermaid.startsWith("flowchart")) {
         throw new Error("Invalid Mermaid.js code. Diagram generation failed.");

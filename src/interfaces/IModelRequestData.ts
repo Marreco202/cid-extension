@@ -4,4 +4,5 @@ export interface IModelRequestData {
     instructions ?: string;
     explanation ?: string;
     component_mapping ?: string;
+    possiblyBrokenMermaid?: string;
 }

@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { IModel } from "../interfaces/IModel.js";
 import { IModelRequestData } from "../interfaces/IModelRequestData.js";
+import { config } from "dotenv";
 
 export class GeminiService implements IModel {
   
@@ -29,7 +30,7 @@ export class GeminiService implements IModel {
 
   }
 
-  private build_prompt(prompt: string) {
+  private build_prompt() {
     const promptParts = [];
   
     if (this.data?.instructions) {
@@ -51,8 +52,12 @@ export class GeminiService implements IModel {
     if (this.data?.component_mapping){
       promptParts.push("\n\n--- Component Mapping ---\n" + this.data?.component_mapping);
     }
+
+     if (this.data?.possiblyBrokenMermaid){
+      promptParts.push("\n\n--- .mermaid file ---\n" + this.data?.possiblyBrokenMermaid);
+    }
   
-    promptParts.push("\n\n--- User Request ---\n" + prompt);
+    // promptParts.push("\n\n--- User Request ---\n" + prompt);
 
     return promptParts.join('');
   }
@@ -60,11 +65,14 @@ export class GeminiService implements IModel {
   async generateResponse(prompt: string): Promise<string> { //TODO : needs to implement data!!!
     try {
 
-      const finalPrompt = this.build_prompt(prompt) //Builds prompt 
+      const finalPrompt = this.build_prompt() //Builds prompt 
 
       const response = await this.googleGenAI.models.generateContent({
         model: this.model_name,
         contents: finalPrompt,
+        config: {
+          systemInstruction : prompt
+        }
       });
 
       // Extract the text content from the response
