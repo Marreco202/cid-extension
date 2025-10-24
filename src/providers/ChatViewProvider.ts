@@ -43,7 +43,7 @@ export class ChatViewProvider {
                 let fullResponse = "";
 
                 try {
-                    const streamResponse = await model.streamChatResponse(userPrompt); //TODO : Implementar esse cara no gemini tambem
+                    const streamResponse = await model.streamChatResponse(userPrompt);
 
                     //Retorna de forma cumulativa a response para a webview
                     if(model.getModelName() === "Ollama"){
@@ -58,11 +58,18 @@ export class ChatViewProvider {
                             console.log(part);
                             const chunkText = part.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
                             fullResponse += chunkText;
-                            // Envia a resposta cumulativa de volta para a webview
                             this._panel?.webview.postMessage({ command: 'chatResponse', text: fullResponse });
                         }
-                    }else{
-                        throw new Error("Model not suportted: FIX BUG");
+                    }
+                    else if(model.getModelName() === "GPT"){
+                        for await (const chunk of streamResponse) {
+                            const chunkText = chunk.choices[0]?.delta?.content ?? '';
+                            fullResponse += chunkText;
+                            this._panel?.webview.postMessage({ command: 'chatResponse', text: fullResponse });
+                        }
+                    }
+                    else {
+                        throw new Error("Model not supported: FIX BUG");
                     }
 
                 } catch (err : any) {

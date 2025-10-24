@@ -166,12 +166,18 @@ export class MermaidViewProvider {
 
     const first_prompt_data = {
       file_tree : file_tree,
-      read_me : read_me
+      read_me : read_me //TODO : Checar se nao tem que colocar algumas instructions genericas aqui do tipo "quero o diagrama em alto nivel"
     };
 
+    //REFACTOR: IF ELSE 
+    let explanation;
     progress.report({ message: "Gerando explicação (1/3)...", increment: 30 });
     model.setData(first_prompt_data);
-    const explanation = await model.generateResponse(BASE_SYSTEM_FIRST_PROMPT);
+    if(model.getModelName() === "GPT") {
+      explanation = await model.generateResponse(BASE_SYSTEM_FIRST_PROMPT,"medium");
+    } else {
+      explanation = await model.generateResponse(BASE_SYSTEM_FIRST_PROMPT);
+    }
     if (token.isCancellationRequested) { return ""; };
 
     //STEP TWO : CONTENT_MAPPING
@@ -183,7 +189,13 @@ export class MermaidViewProvider {
 
     progress.report({ message: "Gerando Content Mapping (2/3)...", increment: 30 });
     model.setData(second_prompt_data);
-    const content_mapping = await model.generateResponse(BASE_SYSTEM_SECOND_PROMPT);
+    let content_mapping;
+
+    if(model.getModelName() === "GPT") {
+      content_mapping = await model.generateResponse(BASE_SYSTEM_SECOND_PROMPT,"low");
+    } else {
+      content_mapping = await model.generateResponse(BASE_SYSTEM_SECOND_PROMPT);
+    }
     if (token.isCancellationRequested) { return ""; };
 
     // STEP THREE: .MERMAID FILE
@@ -193,16 +205,32 @@ export class MermaidViewProvider {
       content_mapping: content_mapping
     };
 
+    let finalMermaidString;
     progress.report({ message: "Finalizando código Mermaid (3/3)...", increment: 20 });
     model.setData(third_prompt_data);
-    const finalMermaidString = await model.generateResponse(BASE_SYSTEM_THIRD_PROMPT);
+    if(model.getModelName() === "GPT") {
+      finalMermaidString = await model.generateResponse(BASE_SYSTEM_THIRD_PROMPT, "low");
+    } else {
+      finalMermaidString = await model.generateResponse(BASE_SYSTEM_THIRD_PROMPT);
+    }
+
+    // const finalMermaidString = await model.generateResponse(BASE_SYSTEM_THIRD_PROMPT);
     if (token.isCancellationRequested) { return ""; };
+
+    const sanitizedMermaid = finalMermaidString
+    .replace(/```mermaid/g, '')
+    .replace(/```/g, '')
+    .trim();
+
+    if (!sanitizedMermaid.startsWith("graph") && !sanitizedMermaid.startsWith("flowchart")) {
+        throw new Error("Invalid Mermaid.js code. Diagram generation failed.");
+    }
 
     progress.report({ message: "Concluído!", increment: 10 });
     await new Promise(resolve => setTimeout(resolve, 500));
     console.log("\n\n\nFINAL MERMAID!\n\n\n");
-    console.log(finalMermaidString);
+    console.log(sanitizedMermaid);
 
-    return finalMermaidString;
+    return sanitizedMermaid;
   }
 }

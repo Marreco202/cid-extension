@@ -6,7 +6,7 @@
 import { IModel } from '../interfaces/IModel';
 import { IModelRequestData } from '../interfaces/IModelRequestData';
 import { OllamaService } from '../services/OllamaService';
-
+import {GPTService} from "../services/GPTService";
 
 export class ModelProvider{
     //Factory method
@@ -20,6 +20,10 @@ export class ModelProvider{
 
         else if(LLM_model === "Ollama"){
             return new OllamaService(data);
+        }
+
+        else if(LLM_model === "GPT") {
+            return new GPTService(data);
         }
         
         throw new Error(`Unsupported model type: ${LLM_model}`);
