@@ -34,6 +34,11 @@ export class OllamaService implements IModel{
      * @param prompt O prompt do usuário.
      * @returns Uma Promise que resolve para a string de conteúdo da resposta do assistente.
      */
+
+    private cleanResponse(response: any): Promise<string> {
+        return response.message.content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+    }
+
     async generateResponse(prompt: string): Promise<string> {
         
         const messages = [];
@@ -50,8 +55,10 @@ export class OllamaService implements IModel{
             messages : messages,
             stream : false
         });
+
+        const final_response = this.cleanResponse(modelResponse);
         
-        return modelResponse.message.content;
+        return final_response;
 
         } catch (err) {
             console.error("Error connecting to Ollama: ",err);
