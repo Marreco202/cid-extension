@@ -13,7 +13,7 @@ export class ModelProvider{
     async factory (LLM_model : string, data?: IModelRequestData) : Promise<IModel> {
         if(LLM_model === "Gemini"){
             const mod =  await import('../services/GeminiService.mjs');
-            const modelName = "gemini-2.5-flash";
+            const modelName = "gemini-2.5-pro";
             const modelInstance = new mod.GeminiService(modelName,data);
             return modelInstance;
         }

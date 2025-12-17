@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// 			readme : repoProvider.getReadme() 
 	// 		};
 
-	const selectedModel = "Gemini";
+	const selectedModel = "Ollama";
 	const model = modelProvider.factory(selectedModel);
 	// const model = modelProvider.factory(selectedModel,repoData);
 
@@ -62,7 +62,12 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const generateAndShowMermaidCommand = vscode.commands.registerCommand('cid.generateAndShowMermaid', async () => {
-		mermaidProvider.generateAndShowMermaidPreview(await model);
+		try {
+			mermaidProvider.generateAndShowMermaidPreview(await model);
+		} catch (err) {
+			console.error(`Failed to Generate and Show Mermaid preview ${err}`);
+			vscode.window.showErrorMessage('Failed to Generate mermaid. See console for details.');
+		}
 	});
 
 	const consolelogReadmeCommand = vscode.commands.registerCommand("cid.printReadMe", async () => {

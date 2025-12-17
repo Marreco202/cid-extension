@@ -90,7 +90,7 @@ export class GeminiService implements IModel {
   async testingGemini() {
     try {
       const response = await this.googleGenAI.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-pro",
         // many libs accept `input`, `prompt` or `contents` — log response for debugging
         contents: "Explain how AI works in a few words",
       });

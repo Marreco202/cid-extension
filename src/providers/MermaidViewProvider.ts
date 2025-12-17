@@ -157,12 +157,23 @@ export class MermaidViewProvider {
   private async generateMermaidString(progress : vscode.Progress<{message?: string; increment?: number}>, token: vscode.CancellationToken, model : IModel): Promise<string | null>{
 
     const file_tree = await getWorkspaceFileString('.');
-    const read_me = await findReadmeFile();
+    const read_me = await Promise.resolve(findReadmeFile());
+
+    console.log(`README FILE : ${read_me}`);
+
+    if(!read_me){
+      throw new Error("No README File returned by findReadmeFile");
+    }
     
     progress.report({ message: "Analisando workspace...", increment: 10 });
-    const workspaceFiles = await getWorkspaceFileString();
     if (token.isCancellationRequested) { return ""; }
     
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100)); // Simula trabalho
+
+    } catch (err) {
+      throw new Error("Found you!");
+    }
     //STEP ONE: EXPLANATION
 
     const first_prompt_data = {
@@ -173,10 +184,11 @@ export class MermaidViewProvider {
     //REFACTOR: IF ELSE 
     let explanation;
     progress.report({ message: "Gerando explicação (1/3)...", increment: 30 });
-    model.setData(first_prompt_data);
     if(model.getModelName() === "GPT") {
+      model.setData(first_prompt_data);
       explanation = await model.generateResponse(BASE_SYSTEM_FIRST_PROMPT,"medium");
     } else {
+      model.setData(first_prompt_data);
       explanation = await model.generateResponse(BASE_SYSTEM_FIRST_PROMPT);
     }
     if (token.isCancellationRequested) { return ""; };
