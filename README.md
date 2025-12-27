@@ -1,71 +1,171 @@
-# cid README
+# CID - Companion In Development
 
-This is the README for your extension "cid". After writing up a brief description, we recommend including the following sections.
+An open source AI-powered copilot for understanding and visualizing code repositories directly in VS Code.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+CID is an AI assistant extension that helps developers understand, analyze, and visualize their codebase with multiple AI model support.
 
-For example if there is an image subfolder under your extension project workspace:
+### 🤖 Multi-Model AI Support
 
-\!\[feature X\]\(images/feature-x.png\)
+- **GPT (OpenAI)**: Use OpenAI's GPT models for code analysis
+- **Gemini (Google)**: Leverage Google's Gemini Pro models
+- **Ollama**: Run local models for privacy-focused development
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### 💬 Interactive Chat Interface
+
+Access an AI chat assistant directly in VS Code to:
+- Get code explanations
+- Receive suggestions and guidance
+- Stream responses in real-time
+>it is basically an LLM Chat window on VSCode, nothing special.
+
+**Command**: `CID: Open Chat`
+
+### 📊 Mermaid Diagram Generation
+
+Automatically generate visual diagrams of your project structure:
+- Analyze repository architecture
+- Create flowcharts and dependency diagrams
+- Render diagrams with interactive pan and zoom
+
+**Commands**: 
+- `CID: Generate and Show Mermaid for Project`
+- `CID: Render Mermaid File on Webview`
+
+### 🔍 Code Analysis Tools
+
+#### Current File Analysis
+- **Command**: `CID: Explain Current File`
+- Get AI-powered explanations of the active file
+
+#### Python Function Analysis
+- **Command**: `CID: List all functions on project`
+- Scan all Python files in your workspace
+- Extract function names, parameters, return types, and docstrings
+- Display results in an organized output channel
+
+#### Workspace File Listing
+- **Command**: `CID: List Workspace Files`
+- View all TypeScript files in your project
+
+### 🎨 Custom Sidebar View
+
+Access CID features through a dedicated sidebar panel in the Activity Bar:
+- Quick access to the chat interface
+- Functions tree view
+- Easy navigation to all CID commands
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+### API Keys (Optional, based on model choice)
+
+Depending on which AI model you want to use, you'll need:
+
+- **OpenAI GPT**: OpenAI API key
+- **Google Gemini**: Google AI API key
+- **Ollama**: Local Ollama installation (no API key needed)
+
+### Dependencies
+
+The extension automatically includes:
+- `openai` - OpenAI SDK
+- `@google/genai` - Google Generative AI SDK
+- `ollama` - Ollama JavaScript library
+- `mermaid` - Diagram rendering
+- `dotenv` - Environment variable management
+
+## Installation
+
+1. Install the extension from the VS Code Marketplace (when published)
+2. Or run from source:
+   ```bash
+   npm install
+   npm run compile
+   ```
+3. Configure your preferred AI model in the extension settings
+4. Add your API keys to a `.env` file (if using cloud models)
+
+## Usage
+
+### Opening the Chat
+
+1. Click the CID icon in the Activity Bar
+2. Click the chat icon in the Functions View header, or
+3. Run the command: `CID: Open Chat`
+
+### Generating Project Diagrams
+
+1. Open your project in VS Code
+2. Run: `CID: Generate and Show Mermaid for Project`
+3. View the interactive diagram in a new panel
+
+### Analyzing Python Code
+
+1. Open a workspace with Python files
+2. Run: `CID: List all functions on project`
+3. Check the "CID: Python functions" output channel for results
+
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `CID: Open Chat` | Launch the interactive AI chat interface |
+| `CID: Explain Current File` | Get an AI explanation of the active file |
+| `CID: List all functions on project` | Analyze all Python functions in workspace |
+| `CID: List Workspace Files` | Display all TypeScript files |
+| `CID: Generate and Show Mermaid for Project` | Create and display project diagram |
+| `CID: Render Mermaid File on Webview` | Preview an open Mermaid file |
+| `CID: Test Gemini Connection` | Verify Gemini API connectivity |
+| `CID: Find and Console Log README.md` | Debug utility for README detection |
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+This extension is currently in early development. Configuration settings will be added in future releases for:
 
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- AI model selection
+- API endpoints
+- Custom prompts
+- Output preferences
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- The extension is in active development (v0.0.1)
+- Some commands are experimental and may require additional configuration
+- Python analysis feature is optimized for Python files only
+
+## Architecture
+
+### Services
+- `GPTService.ts` - OpenAI GPT integration
+- `GeminiService.mts` - Google Gemini integration
+- `OllamaService.ts` - Local Ollama model support
+- `RepositoryService.ts` - Workspace file analysis
+
+### Providers
+- `ChatViewProvider.ts` - Chat interface management
+- `MermaidViewProvider.ts` - Diagram rendering
+- `ModelProvider.ts` - AI model factory
+- `RepoDataProvider.ts` - Repository data collection
+- `FunctionsTreeDataProvider.ts` - Sidebar tree view
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
+Initial development release:
+- Multi-model AI support (GPT, Gemini, Ollama)
+- Interactive chat interface with streaming responses
+- Mermaid diagram generation
+- Python function analysis
+- Custom sidebar integration
 
-Initial release of ...
+## Contributing
 
-### 1.0.1
+This is an open source project. Contributions are welcome!
 
-Fixed issue #.
+## License
 
-### 1.1.0
+[Add your license here]
 
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+**Enjoy using CID!**

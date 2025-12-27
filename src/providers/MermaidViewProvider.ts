@@ -180,7 +180,9 @@ export class MermaidViewProvider {
       file_tree : file_tree,
       read_me : read_me //TODO : Checar se nao tem que colocar algumas instructions genericas aqui do tipo "quero o diagrama em alto nivel"
     };
-
+    
+    console.log(file_tree,read_me);
+    
     //REFACTOR: IF ELSE 
     let explanation;
     progress.report({ message: "Gerando explicação (1/3)...", increment: 30 });
@@ -192,7 +194,8 @@ export class MermaidViewProvider {
       explanation = await model.generateResponse(BASE_SYSTEM_FIRST_PROMPT);
     }
     if (token.isCancellationRequested) { return ""; };
-
+    
+    console.log("EXPLANATION: ",explanation);
     //STEP TWO : CONTENT_MAPPING
 
     const second_prompt_data = {
@@ -212,6 +215,8 @@ export class MermaidViewProvider {
     if (token.isCancellationRequested) { return ""; };
 
     // STEP THREE: .MERMAID FILE
+
+    console.log("CONTENT MAPPING: ",content_mapping);
 
     const third_prompt_data = {
       explanation: explanation,

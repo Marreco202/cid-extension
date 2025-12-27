@@ -42,9 +42,10 @@ export class OllamaService implements IModel{
     async generateResponse(prompt: string): Promise<string> {
         
         const messages = [];
+        const final_prompt = this.build_prompt();
 
         if(this.data?.instructions){
-            messages.push({role: 'system', content: this.data.instructions}); //In this context, instructions == sys_prompt
+            messages.push({role: 'system', content: final_prompt}); //In this context, instructions == sys_prompt
         }
 
         messages.push({role: 'user', content: prompt});
@@ -87,6 +88,38 @@ export class OllamaService implements IModel{
 
     getModelName(): string { //TODO: change it for model type
         return this.model_type;
+    }
+
+    private build_prompt() {
+        const promptParts = [];
+    
+        if (this.data?.instructions) {
+        promptParts.push(this.data?.instructions);
+        }
+        
+        if (this.data?.file_tree) {
+        promptParts.push("\n\n--- Project File Tree ---\n" + this.data?.file_tree);
+        }
+    
+        if (this.data?.readme) {
+        promptParts.push("\n\n--- README ---\n" + this.data?.readme);
+        }
+    
+        if (this.data?.explanation){
+        promptParts.push("\n\n--- Explanation ---\n" + this.data?.explanation);
+        }
+    
+        if (this.data?.component_mapping){
+        promptParts.push("\n\n--- Component Mapping ---\n" + this.data?.component_mapping);
+        }
+
+        if (this.data?.possiblyBrokenMermaid){
+        promptParts.push("\n\n--- .mermaid file ---\n" + this.data?.possiblyBrokenMermaid);
+        }
+    
+        // promptParts.push("\n\n--- User Request ---\n" + prompt);
+
+        return promptParts.join('');
     }
 }
 
