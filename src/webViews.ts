@@ -6,7 +6,7 @@ export function getChatWebViewContent(): string {
 <html lang="en">
   <head>
 	<meta charset="UTF-8">
-	<title>Deep Chat</title>
+	<title>CID Chat</title>
 	<style>
 	  body {
 		background-color: #1e1e1e;
@@ -50,7 +50,7 @@ export function getChatWebViewContent(): string {
 	</style>
   </head>
   <body>
-	<h1>Deep Chat</h1>
+	<h1>CID Chat</h1>
 	<textarea id="prompt" placeholder="Type your question here..."></textarea><br>
 	<button id="askBtn">Ask</button>
 

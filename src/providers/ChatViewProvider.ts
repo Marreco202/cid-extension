@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 
-import {streamChatResponse} from '../services/OllamaService';
-import {getChatWebViewContent} from '../WebViews';
+// import {streamChatResponse} from '../services/OllamaService';
+import {getChatWebViewContent} from '../webViews';
+import { IModel } from '../interfaces/IModel';
 
 export class ChatViewProvider {
 
@@ -14,7 +15,7 @@ export class ChatViewProvider {
     }
 
     //Singleton
-    public createOrShow(){
+    public createOrShow(model: IModel){
         if(this._panel){
             this._panel.reveal(vscode.ViewColumn.One);
             return;
@@ -42,12 +43,33 @@ export class ChatViewProvider {
                 let fullResponse = "";
 
                 try {
-                    const streamResponse = await streamChatResponse(userPrompt);
+                    const streamResponse = await model.streamChatResponse(userPrompt);
 
                     //Retorna de forma cumulativa a response para a webview
-                    for await (const part of streamResponse) {
-                        fullResponse += part.message.content;
-                        this._panel?.webview.postMessage({command: "chatResponse", text:fullResponse});
+                    if(model.getModelName() === "Ollama"){
+                        for await (const part of streamResponse) {
+                            fullResponse += part.message.content;
+                            this._panel?.webview.postMessage({command: "chatResponse", text:fullResponse});
+                        }
+
+                    }
+                    else if(model.getModelName() === "Gemini"){
+                        for await (const part of streamResponse) {
+                            console.log(part);
+                            const chunkText = part.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+                            fullResponse += chunkText;
+                            this._panel?.webview.postMessage({ command: 'chatResponse', text: fullResponse });
+                        }
+                    }
+                    else if(model.getModelName() === "GPT"){
+                        for await (const chunk of streamResponse) {
+                            const chunkText = chunk.choices[0]?.delta?.content ?? '';
+                            fullResponse += chunkText;
+                            this._panel?.webview.postMessage({ command: 'chatResponse', text: fullResponse });
+                        }
+                    }
+                    else {
+                        throw new Error("Model not supported: FIX BUG");
                     }
 
                 } catch (err : any) {

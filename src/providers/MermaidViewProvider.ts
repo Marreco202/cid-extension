@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-import {} from '../services/RepositoryService';
-import {getMermaidWebviewContent} from '../WebViews';
-import {chatResponse} from '../services/OllamaService';
-import {getWorkspaceFileString} from '../services/RepositoryService';
+import {getMermaidWebviewContent} from '../webViews';
+import {getWorkspaceFileString, findReadmeFile} from '../services/RepositoryService';
 
 import {BASE_SYSTEM_FIRST_PROMPT,BASE_SYSTEM_SECOND_PROMPT,BASE_SYSTEM_THIRD_PROMPT} from '../prompts/BaselineSysPrompt';
+import { IModel } from '../interfaces/IModel';
+import { GEMINI_CORRECT_MERMAID } from '../prompts/GeminiPrompts';
 
 export class MermaidViewProvider {
 
@@ -117,71 +117,145 @@ export class MermaidViewProvider {
     return finalMermaidString;
   }
 
+    /**
+   * Ponto de entrada principal para gerar o diagrama com feedback de progresso
+   */
+  public async generateAndShowMermaidPreview(model : IModel) {
+    await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "Gerando Diagrama Mermaid",
+        cancellable: true
+    }, async (progress, token) => {
+        try {
+            // Toda a lógica agora acontece aqui dentro.
+            const mermaidString = await this.generateMermaidString(progress, token, model);
 
-      /**
-     * Ponto de entrada principal para gerar o diagrama com feedback de progresso
-     */
-    public async generateAndShowMermaidPreview() {
-      await vscode.window.withProgress({
-          location: vscode.ProgressLocation.Notification,
-          title: "Gerando Diagrama Mermaid",
-          cancellable: true
-      }, async (progress, token) => {
-          try {
-              // Toda a lógica agora acontece aqui dentro.
-              const mermaidString = await this.generateMermaidString(progress, token);
+            if (token.isCancellationRequested) {
+              // console.log("Graph generation cancelled by user.");
+              throw new Error("Cancelled");
+            }
 
-              if (token.isCancellationRequested) {
-                // console.log("Graph generation cancelled by user.");
-                throw new Error("Cancelled");
-              }
+            // Se a geração foi bem-sucedida (não foi cancelada), mostre o resultado.
+            if (mermaidString) {
+                this.showMermaidFile(mermaidString, "Project Diagram"); //TODO colocar o nome do repositorio nesse titulo
+            }
 
-              // Se a geração foi bem-sucedida (não foi cancelada), mostre o resultado.
-              if (mermaidString) {
-                  this.showMermaidFile(mermaidString, "Project Diagram"); //TODO colocar o nome do repositorio nesse titulo
-              }
-
-          } catch (error: any) {
-              if(token.isCancellationRequested){
-                vscode.window.showErrorMessage(`Graph generation cancelled by user: ${error.message}`);
-              }
-              else if (!token.isCancellationRequested) {
-                vscode.window.showErrorMessage(`Error while generating diagram: ${error.message}`);
-              }
-          }
-      });
+        } catch (error: any) {
+            if(token.isCancellationRequested){
+              vscode.window.showErrorMessage(`Graph generation cancelled by user: ${error.message}`);
+            }
+            else if (!token.isCancellationRequested) {
+              vscode.window.showErrorMessage(`Error while generating diagram: ${error.message}`);
+            }
+        }
+    });
   }
 
 
-  private async generateMermaidString(progress : vscode.Progress<{message?: string; increment?: number}>, token: vscode.CancellationToken): Promise<string | null>{
+  private async generateMermaidString(progress : vscode.Progress<{message?: string; increment?: number}>, token: vscode.CancellationToken, model : IModel): Promise<string | null>{
 
+    const file_tree = await getWorkspaceFileString('.');
+    const read_me = await Promise.resolve(findReadmeFile());
+
+    console.log(`README FILE : ${read_me}`);
+
+    if(!read_me){
+      throw new Error("No README File returned by findReadmeFile");
+    }
+    
     progress.report({ message: "Analisando workspace...", increment: 10 });
-    const workspaceFiles = await getWorkspaceFileString();
     if (token.isCancellationRequested) { return ""; }
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100)); // Simula trabalho
 
-    // Primeira chamada mock
-    progress.report({ message: "Gerando rascunho (1/3)...", increment: 30 });
-    // await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
-    const first_response = await chatResponse(workspaceFiles, BASE_SYSTEM_FIRST_PROMPT);
+    } catch (err) {
+      throw new Error("Found you!");
+    }
+    //STEP ONE: EXPLANATION
+
+    const first_prompt_data = {
+      file_tree : file_tree,
+      read_me : read_me //TODO : Checar se nao tem que colocar algumas instructions genericas aqui do tipo "quero o diagrama em alto nivel"
+    };
+    
+    console.log(file_tree,read_me);
+    
+    //REFACTOR: IF ELSE 
+    let explanation;
+    progress.report({ message: "Gerando explicação (1/3)...", increment: 30 });
+    if(model.getModelName() === "GPT") {
+      model.setData(first_prompt_data);
+      explanation = await model.generateResponse(BASE_SYSTEM_FIRST_PROMPT,"medium");
+    } else {
+      model.setData(first_prompt_data);
+      explanation = await model.generateResponse(BASE_SYSTEM_FIRST_PROMPT);
+    }
+    if (token.isCancellationRequested) { return ""; };
+    
+    console.log("EXPLANATION: ",explanation);
+    //STEP TWO : CONTENT_MAPPING
+
+    const second_prompt_data = {
+      explanation: explanation,
+      file_tree: file_tree
+    };
+
+    progress.report({ message: "Gerando Content Mapping (2/3)...", increment: 30 });
+    model.setData(second_prompt_data);
+    let content_mapping;
+
+    if(model.getModelName() === "GPT") {
+      content_mapping = await model.generateResponse(BASE_SYSTEM_SECOND_PROMPT,"low");
+    } else {
+      content_mapping = await model.generateResponse(BASE_SYSTEM_SECOND_PROMPT);
+    }
     if (token.isCancellationRequested) { return ""; };
 
-    // Segunda chamada mock
-    progress.report({ message: "Refinando estrutura (2/3)...", increment: 30 });
-    // await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
-    const second_response = await chatResponse(first_response, BASE_SYSTEM_SECOND_PROMPT);
-    if (token.isCancellationRequested) { return ""; };
+    // STEP THREE: .MERMAID FILE
 
-    // Terceira chamada mock
+    console.log("CONTENT MAPPING: ",content_mapping);
+
+    const third_prompt_data = {
+      explanation: explanation,
+      content_mapping: content_mapping
+    };
+
+    let finalMermaidString;
     progress.report({ message: "Finalizando código Mermaid (3/3)...", increment: 20 });
-    // await new Promise(resolve => setTimeout(resolve, 1500)); // Simula trabalho
-    const finalMermaidString = await chatResponse(second_response, BASE_SYSTEM_THIRD_PROMPT);
-    // const finalMermaidString = `graph TD;\n    A[Workspace] --> B{LLM Gen};\n    B --> C[Diagrama];`;
+    model.setData(third_prompt_data);
+    if(model.getModelName() === "GPT") {
+      finalMermaidString = await model.generateResponse(BASE_SYSTEM_THIRD_PROMPT, "low");
+    } else {
+      finalMermaidString = await model.generateResponse(BASE_SYSTEM_THIRD_PROMPT);
+    }
+
+    // const finalMermaidString = await model.generateResponse(BASE_SYSTEM_THIRD_PROMPT);
     if (token.isCancellationRequested) { return ""; };
+
+    const sanitizedMermaid = finalMermaidString
+    .replace(/```mermaid/g, '')
+    .replace(/```/g, '')
+    .trim();
+
+
+    if(model.getModelName() === "Gemini") {
+      console.log("CORRECTING GEMINI...");
+      model.setData({
+        possiblyBrokenMermaid : finalMermaidString
+      });
+      finalMermaidString = await model.generateResponse(GEMINI_CORRECT_MERMAID);
+    }
+
+    if (!sanitizedMermaid.startsWith("graph") && !sanitizedMermaid.startsWith("flowchart")) {
+        throw new Error("Invalid Mermaid.js code. Diagram generation failed.");
+    }
 
     progress.report({ message: "Concluído!", increment: 10 });
     await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return finalMermaidString;
-  }
+    console.log("\n\n\nFINAL MERMAID!\n\n\n");
+    console.log(sanitizedMermaid);
 
+    return sanitizedMermaid;
+  }
 }

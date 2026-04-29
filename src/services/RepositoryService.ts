@@ -110,4 +110,50 @@ export async function getWorkspaceFileString(dir: string = ".", baseDir: string 
     const fileList = await getWorkspaceFileList(dir, baseDir);
     return fileList.join("\n");
 }
-//console.log(getWorkspaceFileList("."));
+
+/**
+ * Finds and reads README.md file in the workspace.
+ * Prioritizes README files at the root of workspace folders, then searches recursively.
+ * @returns A Promise that resolves to the content of the README file, or undefined if not found.
+ */
+export async function findReadmeFile(): Promise<string | undefined> {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders) {
+    console.warn("No workspace folder open.");
+    return undefined;
+  }
+
+  const excludePattern = '{**/node_modules/**,**/venv/**,**/.env/**,**/__pycache__/**}';
+
+  try {
+    // First priority: Search for README.md in the root of each workspace folder
+    for (const folder of workspaceFolders) {
+      const rootPattern = new vscode.RelativePattern(folder, '[Rr][Ee][Aa][Dd][Mm][Ee].[Mm][Dd]');
+      const rootFiles = await vscode.workspace.findFiles(rootPattern, excludePattern, 1);
+
+      if (rootFiles.length > 0) {
+        const readmeUri = rootFiles[0];
+        // console.log(`Found README.md at root: ${readmeUri.fsPath}`);
+        const content = await vscode.workspace.fs.readFile(readmeUri);
+        return new TextDecoder("utf-8").decode(content);
+      }
+    }
+
+    // Second priority: Search recursively in the workspace
+    const recursivePattern = '**/[Rr][Ee][Aa][Dd][Mm][Ee].[Mm][Dd]';
+    const files = await vscode.workspace.findFiles(recursivePattern, excludePattern, 1);
+
+    if (files.length === 0) {
+      console.warn("No README.md file found in the workspace.");
+      return undefined;
+    }
+
+    const readmeUri = files[0];
+    // console.log(`Found README.md recursively: ${readmeUri.fsPath}`);
+    const content = await vscode.workspace.fs.readFile(readmeUri);
+    return new TextDecoder("utf-8").decode(content);
+  } catch (err) {
+    console.error("Error reading README.md file:", err);
+    return undefined;
+  }
+}
