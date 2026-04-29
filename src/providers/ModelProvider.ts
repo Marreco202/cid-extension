@@ -27,7 +27,6 @@ export class ModelProvider{
         }
         
         throw new Error(`Unsupported model type: ${LLM_model}`);
-        //Colocar Ollama aqui depois
 
     }
 }

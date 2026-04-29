@@ -7,7 +7,6 @@ interface FunctionInfo {
 }
 
 
-// Esta função fará a análise e retornará os dados
 async function parsePythonFiles(): Promise<FunctionInfo[]> {
     const files = await vscode.workspace.findFiles('**/*.py');
     const allFunctions: FunctionInfo[] = [];

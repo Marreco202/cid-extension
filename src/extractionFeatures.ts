@@ -23,7 +23,6 @@ export async function analyzePythonFiles() {
 
     let result: string[] = [];
 
-	 // --- ADICIONE ESTA LINHA PARA DEBUG ---
     console.log(`Arquivos .py encontrados: ${files.length}`, files.map(f => f.fsPath));
 
 
@@ -37,10 +36,9 @@ export async function analyzePythonFiles() {
 
         let match;
 
-		// --- ADICIONE ESTAS LINHAS PARA DEBUG ---
 		output.append(`--- Analisando o arquivo: ${file.fsPath} ---`);
 
-		// console.log(text); // Descomente esta linha para ver o conteúdo completo do arquivo
+		
         while ((match = funcRegex.exec(text)) !== null) {
             const [, funcName, paramsRaw, returnType, body] = match;
 			

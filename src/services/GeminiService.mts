@@ -21,7 +21,6 @@ export class GeminiService implements IModel {
     const API_KEY = process.env.GOOGLE_API_KEY; // set this in your environment
     
     if (!API_KEY) {
-      // console.error("Missing GOOGLE_API_KEY environment variable");
       throw new Error("Missing GOOGLE_API_KEY environment variable");
     }
     
@@ -127,7 +126,7 @@ export class GeminiService implements IModel {
     this.data = data;
   }
   
-  getModelName(): string { //TODO : trocar para model type
+  getModelName(): string {
     return this.model_type;
   }
 }

@@ -6,8 +6,6 @@ import {getWorkspaceFileString, findReadmeFile} from '../services/RepositoryServ
 
 import {BASE_SYSTEM_FIRST_PROMPT,BASE_SYSTEM_SECOND_PROMPT,BASE_SYSTEM_THIRD_PROMPT} from '../prompts/BaselineSysPrompt';
 import { IModel } from '../interfaces/IModel';
-import { read } from 'fs';
-import { execPath } from 'process';
 import { GEMINI_CORRECT_MERMAID } from '../prompts/GeminiPrompts';
 
 export class MermaidViewProvider {
