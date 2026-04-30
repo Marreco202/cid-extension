@@ -1,6 +1,11 @@
-# CID - Companion In Development
+# CiD - Companion in Development
 
-An open source AI-powered copilot for understanding and visualizing code repositories directly in VS Code.
+An open-source VS Code extension that helps newcomers understand and contribute to open-source repositories through AI-generated architectural diagrams.
+
+[![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)](https://marketplace.visualstudio.com/items?itemName=Marreco202.cid-extension)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue.svg)](https://code.visualstudio.com/api)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTE.md)
 
 ## Features
 
@@ -162,10 +167,10 @@ Initial development release:
 
 ## Contributing
 
-This is an open source project. Contributions are welcome!
+We welcome contributions from the community! Please read our [Contributing Guidelines](CONTRIBUTE.md) to understand our workflow, commit convention, and how to submit a Pull Request. Please also review our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 
 ## License
 
-[Add your license here]
+This project is licensed under the [MIT License](LICENSE).
 
 **Enjoy using CID!**
