@@ -3,6 +3,7 @@
   "displayName": "CID",
   "description": "Open source copilot for understanding repositories",
   "version": "0.0.1",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.102.0"
   },
