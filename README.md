@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="media/smile.svg" alt="CID Logo" width="128"/>
+</p>
+
 # CiD - Companion in Development
 
 An open-source VS Code extension that helps newcomers understand and contribute to open-source repositories through AI-generated architectural diagrams.
