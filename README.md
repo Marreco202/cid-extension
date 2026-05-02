@@ -27,7 +27,6 @@ Access an AI chat assistant directly in VS Code to:
 - Get code explanations
 - Receive suggestions and guidance
 - Stream responses in real-time
->it is basically an LLM Chat window on VSCode, nothing special.
 
 **Command**: `CID: Open Chat`
 
