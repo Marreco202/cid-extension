@@ -10,6 +10,17 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "ai",
+    "copilot",
+    "code-assistant",
+    "mermaid",
+    "gemini",
+    "ollama",
+    "openai",
+    "vscode-extension",
+    "typescript"
+  ],
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
