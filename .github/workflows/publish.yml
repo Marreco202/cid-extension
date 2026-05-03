@@ -1,0 +1,31 @@
+name: Publish Extension
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'package.json' # Aciona a automação preferencialmente quando houver uma mudança no package.json (como a atualização da versão)
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run lint and tests
+        run: npm run test
+        continue-on-error: false # Altere para false se quiser bloquear o publish quando o teste falhar
+
+      - name: Publish to Visual Studio Code Marketplace
+        run: npx @vscode/vsce publish -p ${{ secrets.VSCE_PAT }}
