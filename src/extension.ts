@@ -113,6 +113,20 @@ export async function activate(context: vscode.ExtensionContext) {
     );
 
 	context.subscriptions.push(
+		context.secrets.onDidChange(event => {
+			const expectedKey = `${llmConfig.provider}_api_key`;
+			if (event.key === expectedKey) {
+				llmConfig = getLlmConfig();
+				apiProvider.getSecret(llmConfig.provider).then(api_key => {
+					model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined);
+					// Opcional: Avisar o usuário que a instância do modelo atualizou após a nova chave
+					vscode.window.showInformationMessage(`CiD: API Key for ${llmConfig.provider} was updated and applied.`);
+				});
+			}
+		})
+	);
+
+	context.subscriptions.push(
 		vscode.commands.registerCommand('cid.listWorkspaceFiles', repoProvider.getWorkspaceFileList)
 	);
 	
