@@ -30,14 +30,14 @@ export function activate(context: vscode.ExtensionContext) {
 	const repoProvider = new RepoDataProvider();
 	const modelProvider = new ModelProvider();
 
-	//Repository Data
-	// const repoData  = {
-	// 			file_tree : repoProvider.getWorkspaceFileList(),
-	// 			readme : repoProvider.getReadme() 
-	// 		};
+	const getConfiguredModel = (): string => {
+        const config = vscode.workspace.getConfiguration('cid');
+        return config.get<string>('modelProvider', 'Ollama'); 
+    };
 
-	const selectedModel = "Ollama";
-	const model = modelProvider.factory(selectedModel);
+
+	let selectedModel = getConfiguredModel();
+	let model = modelProvider.factory(selectedModel);
 
 
 	// Registra o comando que simplesmente chama o método para mostrar a janela
@@ -51,6 +51,17 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 	});
+
+	context.subscriptions.push(
+        vscode.workspace.onDidChangeConfiguration(event => {
+            // Verifica se a mudança foi especificamente na nossa configuração 'cid.modelProvider'
+            if (event.affectsConfiguration('cid.modelProvider')) {
+                selectedModel = getConfiguredModel();
+                model = modelProvider.factory(selectedModel); // Atualiza a instância do modelo
+                vscode.window.showInformationMessage(`CiD: LLM Family changed to ${selectedModel}.`);
+            }
+        })
+    );
 	
 	const showMermaidCommand = vscode.commands.registerCommand('cid.renderMermaid', () => {
 		mermaidProvider.showMermaidPreview();
