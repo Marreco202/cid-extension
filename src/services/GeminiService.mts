@@ -1,7 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { IModel } from "../interfaces/IModel.js";
 import { IModelRequestData } from "../interfaces/IModelRequestData.js";
-import { config } from "dotenv";
 
 export class GeminiService implements IModel {
   

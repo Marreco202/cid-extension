@@ -14,7 +14,6 @@ export class GPTService implements IModel {
     private base_url : string;
 
     constructor(model_name: string, api_key?: string, data?: Partial<IModelRequestData>) {
-        // this.model_name = "o4-mini";
         this.model_name = model_name;
         this.model_type = "GPT";
         this.base_url = "https://api.openai.com/v1/chat/completions";
@@ -74,11 +73,6 @@ export class GPTService implements IModel {
             'Content-Type' : "application/json",
             Authorization: `Bearer ${this.api_key}`
         };
-
-
-        // if (this.api_key === undefined){
-        //     throw new Error("OpenAI API key is undefined");
-        // }
 
         console.log(`call_o4_api data: ${this.data?.readme}`);
 
@@ -146,7 +140,6 @@ export class GPTService implements IModel {
 }
 
     async streamChatResponse(prompt: string, reasoning_effort: string = "medium") {
-    const system_prompt = this.data?.instructions || "You are a helpful assistant.";
 
 
     try {
