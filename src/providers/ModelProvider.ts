@@ -2,7 +2,7 @@
 //** CRIAR FACTORY DE PROVIDERS DE DIFERENTES MODELOS (e.g. GeminiProvider).
 // */ Dentro de GeminiProvider, colocar o que está na extension.ts hardcoded para conseguir modularizar bem, e tirar responsabilidade da main
 
-import * as vscode from 'vscode'; // <-- 1. Adicione este import
+import * as vscode from 'vscode';
 import { IModel } from '../interfaces/IModel';
 import { IModelRequestData } from '../interfaces/IModelRequestData';
 import { OllamaService } from '../services/OllamaService';
@@ -10,13 +10,10 @@ import {GPTService} from "../services/GPTService";
 
 export class ModelProvider{
     //Factory method
-    async factory (LLM_model : string, modelName : string, context: vscode.ExtensionContext, data?: IModelRequestData) : Promise<IModel> {
-
-        let api_key : string | undefined;
-        
-        api_key = await context.secrets.get('model_api_key');
+    async factory (LLM_model : string, modelName : string, api_key? : string ,data?: IModelRequestData) : Promise<IModel> {
 
         if(LLM_model !== "Ollama" && !api_key) {
+            vscode.window.showErrorMessage(`Missing API Key for ${LLM_model}`);
             throw new Error(`Missing API Key for ${LLM_model}`);
         }
 

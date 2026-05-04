@@ -10,10 +10,11 @@ import {MermaidViewProvider} from './providers/MermaidViewProvider';
 // import {explainSelectedCode} from './services/OllamaService';
 
 import { ModelProvider } from './providers/ModelProvider';
+import { ApiProvider } from './providers/ApiProvider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 
 	  // REGISTRA A NOVA TREE VIEW
 	const functionsProvider = new FunctionsTreeDataProvider();
@@ -22,14 +23,14 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	console.log('Congratulations, your extension "cid" is now active!');
-	vscode.window.showInformationMessage('Hello World from CID!');
+	vscode.window.showInformationMessage('Hello World from CiD!');
 
 	// Instancia o nosso provedor da view de chat
 	const chatProvider = new ChatViewProvider(context);
 	const mermaidProvider = new MermaidViewProvider(context);
 	const repoProvider = new RepoDataProvider();
 	const modelProvider = new ModelProvider();
-
+	const apiProvider = new ApiProvider(context);
 
 	const getLlmConfig = () => {
 		const config = vscode.workspace.getConfiguration('cid');
@@ -40,8 +41,8 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 
 	let llmConfig = getLlmConfig();
-	// let selectedModel = getConfiguredModel();
-	let model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, context);
+	const api_key = await apiProvider.getSecret(llmConfig.provider);
+	let model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined);
 
 
 	// Registra o comando que simplesmente chama o método para mostrar a janela
@@ -58,18 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
  
 	const setApiKeyCommand = vscode.commands.registerCommand('cid.setApiKey', async () => {
 		// Opens input box on top of the editor
-		const apiKey = await vscode.window.showInputBox({
-			prompt: 'Insert your API Key',
-			placeHolder: 'AIzaSy...',
-			password: true,
-			ignoreFocusOut: true
-		});
-
-		if (apiKey) {
-			// Saves the cryptographed key
-			await context.secrets.store('model_api_key', apiKey);
-			vscode.window.showInformationMessage('API Key saved safely!');
-		}
+		apiProvider.setSecret(llmConfig.provider);
 	});  
 	
 	const showMermaidCommand = vscode.commands.registerCommand('cid.renderMermaid', () => {
@@ -96,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
 		try {
 
-			const model_instance = await new ModelProvider().factory("gemini-2.5-pro","Gemini", context);
+			const model_instance = await new ModelProvider().factory("gemini-2.5-pro","Gemini");
 			model_instance.generateResponse("What is the meaning of life? Use 50 words max");
 
 		} catch (err) {
@@ -114,8 +104,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 				llmConfig = getLlmConfig();
                 
-                model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, context); // Updates model instance if settings changed.
-                vscode.window.showInformationMessage(`CiD: LLM Family changed to ${llmConfig.provider}.`);
+                apiProvider.getSecret(llmConfig.provider).then(api_key => {
+					model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined); // Updates model instance if settings changed.
+					vscode.window.showInformationMessage(`CiD: LLM Family changed to ${llmConfig.provider}.`);
+				});
             }
         })
     );
