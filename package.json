@@ -89,6 +89,10 @@
       {
         "command": "cid.setApiKey",
         "title": "CID: Set API Key"
+      },
+      {
+        "command": "cid.clearAllApiKeys",
+        "title": "CID: Clear All Saved API Keys"
       }
     ],
     "views": {

@@ -22,8 +22,22 @@ export class ApiProvider {
         this.ApiConfigs[model_type] = buf_api_config; //Only sets the object when the secret is sucessfully attributed
     }
 
-    public clearSecret(model_type : string){
-        this.ApiConfigs[model_type] = undefined; //FIXME: check if this could memory leak since we are dereferencing a object without clearing memory
+    public async clearSecret(model_type : string){
+        // Cria uma instância temporária se ela não estiver na memória, só para poder deletar o segredo armazenado
+        const apiService = this.ApiConfigs[model_type] || new ApiService(model_type, this._context);
+        await apiService.deleteSecret();
+        
+        this.ApiConfigs[model_type] = undefined; 
+    }
+
+    public async clearAllSecrets() {
+        const models = Object.keys(this.ApiConfigs); // Get "Gemini", "GPT", etc.
+        
+        for (const model of models) {
+            await this.clearSecret(model);
+        }
+        
+        vscode.window.showInformationMessage('All API Keys have been successfully cleared from storage.');
     }
 
     public async getSecret(model_type : string){

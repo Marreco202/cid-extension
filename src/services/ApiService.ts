@@ -24,11 +24,15 @@ export class ApiService {
         if (apiKey) {
 			// Saves the encrypted key
 			await this._context.secrets.store(this.which_secret, apiKey);
-			vscode.window.showInformationMessage('API Key saved safely!');
+			// vscode.window.showInformationMessage('API Key saved safely!');
 		}
     }
 
     public async getSecret(){
         return await this._context.secrets.get(this.which_secret);
+    }
+
+    public async deleteSecret() {
+        await this._context.secrets.delete(this.which_secret);
     }
 }

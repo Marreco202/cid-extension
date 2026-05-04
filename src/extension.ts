@@ -95,6 +95,17 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
+	const clearAllKeysCommand = vscode.commands.registerCommand('cid.clearAllApiKeys', async () => {
+		const confirmation = await vscode.window.showWarningMessage(
+			'Are you sure you want to delete ALL saved API Keys?',
+			'Yes, delete all', 'Cancel'
+		);
+
+		if (confirmation === 'Yes, delete all') {
+			await apiProvider.clearAllSecrets();
+		}
+	});
+
 
 	context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration(event => {
@@ -148,7 +159,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(testingGeminiCommand);
 	context.subscriptions.push(consolelogReadmeCommand);
 	context.subscriptions.push(setApiKeyCommand);
-
+	context.subscriptions.push(clearAllKeysCommand);
 
 
 }
