@@ -85,6 +85,10 @@
       {
         "command": "cid.printReadMe",
         "title": "CID: Find and Console Log README.md"
+      },
+      {
+        "command": "cid.setApiKey",
+        "title": "CID: Set API Key"
       }
     ],
     "views": {

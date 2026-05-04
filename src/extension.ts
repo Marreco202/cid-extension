@@ -41,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let llmConfig = getLlmConfig();
 	// let selectedModel = getConfiguredModel();
-	let model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel);
+	let model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, context);
 
 
 	// Registra o comando que simplesmente chama o método para mostrar a janela
@@ -55,20 +55,22 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 	});
+ 
+	const setApiKeyCommand = vscode.commands.registerCommand('cid.setApiKey', async () => {
+		// Opens input box on top of the editor
+		const apiKey = await vscode.window.showInputBox({
+			prompt: 'Insert your API Key',
+			placeHolder: 'AIzaSy...',
+			password: true,
+			ignoreFocusOut: true
+		});
 
-	context.subscriptions.push(
-        vscode.workspace.onDidChangeConfiguration(event => {
-			//This if needs refactoring for more elegant solution.
-            if (event.affectsConfiguration('cid.modelProvider') ||
-				event.affectsConfiguration('cid.modelName')) {
-
-				llmConfig = getLlmConfig();
-                
-                model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel); // Updates model instance if settings changed.
-                vscode.window.showInformationMessage(`CiD: LLM Family changed to ${llmConfig.provider}.`);
-            }
-        })
-    );
+		if (apiKey) {
+			// Saves the cryptographed key
+			await context.secrets.store('model_api_key', apiKey);
+			vscode.window.showInformationMessage('API Key saved safely!');
+		}
+	});  
 	
 	const showMermaidCommand = vscode.commands.registerCommand('cid.renderMermaid', () => {
 		mermaidProvider.showMermaidPreview();
@@ -94,7 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
 		try {
 
-			const model_instance = await new ModelProvider().factory("gemini-2.5-pro","Gemini");
+			const model_instance = await new ModelProvider().factory("gemini-2.5-pro","Gemini", context);
 			model_instance.generateResponse("What is the meaning of life? Use 50 words max");
 
 		} catch (err) {
@@ -102,6 +104,21 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage('Failed to run Gemini test. See console for details.');
 		}
 	});
+
+
+	context.subscriptions.push(
+        vscode.workspace.onDidChangeConfiguration(event => {
+			//This if needs refactoring for more elegant solution.
+            if (event.affectsConfiguration('cid.modelProvider') ||
+				event.affectsConfiguration('cid.modelName')) {
+
+				llmConfig = getLlmConfig();
+                
+                model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, context); // Updates model instance if settings changed.
+                vscode.window.showInformationMessage(`CiD: LLM Family changed to ${llmConfig.provider}.`);
+            }
+        })
+    );
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('cid.listWorkspaceFiles', repoProvider.getWorkspaceFileList)
@@ -124,6 +141,9 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(generateAndShowMermaidCommand);
 	context.subscriptions.push(testingGeminiCommand);
 	context.subscriptions.push(consolelogReadmeCommand);
+	context.subscriptions.push(setApiKeyCommand);
+
+
 
 }
 
