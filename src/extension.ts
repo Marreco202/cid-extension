@@ -30,14 +30,18 @@ export function activate(context: vscode.ExtensionContext) {
 	const repoProvider = new RepoDataProvider();
 	const modelProvider = new ModelProvider();
 
-	const getConfiguredModel = (): string => {
-        const config = vscode.workspace.getConfiguration('cid');
-        return config.get<string>('modelProvider', 'Ollama'); 
-    };
 
+	const getLlmConfig = () => {
+		const config = vscode.workspace.getConfiguration('cid');
+		return {
+			provider: config.get<string>('modelProvider','Ollama'),
+			selectedModel: config.get<string>('modelName','gemma4:e4b')
+		};
+	};
 
-	let selectedModel = getConfiguredModel();
-	let model = modelProvider.factory(selectedModel);
+	let llmConfig = getLlmConfig();
+	// let selectedModel = getConfiguredModel();
+	let model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel);
 
 
 	// Registra o comando que simplesmente chama o método para mostrar a janela
@@ -54,11 +58,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration(event => {
-            // Verifica se a mudança foi especificamente na nossa configuração 'cid.modelProvider'
-            if (event.affectsConfiguration('cid.modelProvider')) {
-                selectedModel = getConfiguredModel();
-                model = modelProvider.factory(selectedModel); // Atualiza a instância do modelo
-                vscode.window.showInformationMessage(`CiD: LLM Family changed to ${selectedModel}.`);
+			//This if needs refactoring for more elegant solution.
+            if (event.affectsConfiguration('cid.modelProvider') ||
+				event.affectsConfiguration('cid.modelName')) {
+
+				llmConfig = getLlmConfig();
+                
+                model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel); // Updates model instance if settings changed.
+                vscode.window.showInformationMessage(`CiD: LLM Family changed to ${llmConfig.provider}.`);
             }
         })
     );
@@ -87,7 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
 		try {
 
-			const model_instance = await new ModelProvider().factory("Gemini");
+			const model_instance = await new ModelProvider().factory("gemini-2.5-pro","Gemini");
 			model_instance.generateResponse("What is the meaning of life? Use 50 words max");
 
 		} catch (err) {

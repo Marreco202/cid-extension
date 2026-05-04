@@ -10,20 +10,20 @@ import {GPTService} from "../services/GPTService";
 
 export class ModelProvider{
     //Factory method
-    async factory (LLM_model : string, data?: IModelRequestData) : Promise<IModel> {
+    async factory (LLM_model : string, modelName : string, data?: IModelRequestData) : Promise<IModel> {
         if(LLM_model === "Gemini"){
             const mod =  await import('../services/GeminiService.mjs');
-            const modelName = "gemini-2.5-pro";
+            // const modelName = "gemini-2.5-pro";
             const modelInstance = new mod.GeminiService(modelName,data);
             return modelInstance;
         }
 
         else if(LLM_model === "Ollama"){
-            return new OllamaService(data);
+            return new OllamaService(modelName,data);
         }
 
         else if(LLM_model === "GPT") {
-            return new GPTService(data);
+            return new GPTService(modelName,data);
         }
         
         throw new Error(`Unsupported model type: ${LLM_model}`);
