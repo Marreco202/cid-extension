@@ -2,7 +2,7 @@
   "name": "companion-in-development",
   "displayName": "CiD (Companion in Development)",
   "description": "Open source copilot for understanding repositories",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "marreco",
   "repository": {
     "type": "git",
