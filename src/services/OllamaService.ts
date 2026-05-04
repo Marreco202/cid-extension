@@ -14,8 +14,8 @@ export class OllamaService implements IModel{
     private data ?: Partial<IModelRequestData>;
 
 
-    constructor(data ?: Partial<IModelRequestData>, model ?: string) {
-        this.model_name = process.env.OLLAMA_MODEL ?? model ?? 'i like coffee :)';
+    constructor(model_name : string, data ?: Partial<IModelRequestData>, model ?: string) {
+        this.model_name = model_name;
         this.model_type = "Ollama";
         
         if(data){

@@ -10,10 +10,11 @@ import {MermaidViewProvider} from './providers/MermaidViewProvider';
 // import {explainSelectedCode} from './services/OllamaService';
 
 import { ModelProvider } from './providers/ModelProvider';
+import { ApiProvider } from './providers/ApiProvider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 
 	  // REGISTRA A NOVA TREE VIEW
 	const functionsProvider = new FunctionsTreeDataProvider();
@@ -22,22 +23,26 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	console.log('Congratulations, your extension "cid" is now active!');
-	vscode.window.showInformationMessage('Hello World from CID!');
+	vscode.window.showInformationMessage('Hello World from CiD!');
 
 	// Instancia o nosso provedor da view de chat
 	const chatProvider = new ChatViewProvider(context);
 	const mermaidProvider = new MermaidViewProvider(context);
 	const repoProvider = new RepoDataProvider();
 	const modelProvider = new ModelProvider();
+	const apiProvider = new ApiProvider(context);
 
-	//Repository Data
-	// const repoData  = {
-	// 			file_tree : repoProvider.getWorkspaceFileList(),
-	// 			readme : repoProvider.getReadme() 
-	// 		};
+	const getLlmConfig = () => {
+		const config = vscode.workspace.getConfiguration('cid');
+		return {
+			provider: config.get<string>('modelProvider','Ollama'),
+			selectedModel: config.get<string>('modelName','gemma4:e4b')
+		};
+	};
 
-	const selectedModel = "Ollama";
-	const model = modelProvider.factory(selectedModel);
+	let llmConfig = getLlmConfig();
+	const api_key = await apiProvider.getSecret(llmConfig.provider);
+	let model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined);
 
 
 	// Registra o comando que simplesmente chama o método para mostrar a janela
@@ -51,6 +56,11 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 	});
+ 
+	const setApiKeyCommand = vscode.commands.registerCommand('cid.setApiKey', async () => {
+		// Opens input box on top of the editor
+		apiProvider.setSecret(llmConfig.provider);
+	});  
 	
 	const showMermaidCommand = vscode.commands.registerCommand('cid.renderMermaid', () => {
 		mermaidProvider.showMermaidPreview();
@@ -76,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
 		try {
 
-			const model_instance = await new ModelProvider().factory("Gemini");
+			const model_instance = await new ModelProvider().factory("gemini-2.5-pro","Gemini");
 			model_instance.generateResponse("What is the meaning of life? Use 50 words max");
 
 		} catch (err) {
@@ -84,6 +94,48 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage('Failed to run Gemini test. See console for details.');
 		}
 	});
+
+	const clearAllKeysCommand = vscode.commands.registerCommand('cid.clearAllApiKeys', async () => {
+		const confirmation = await vscode.window.showWarningMessage(
+			'Are you sure you want to delete ALL saved API Keys?',
+			'Yes, delete all', 'Cancel'
+		);
+
+		if (confirmation === 'Yes, delete all') {
+			await apiProvider.clearAllSecrets();
+		}
+	});
+
+
+	context.subscriptions.push(
+        vscode.workspace.onDidChangeConfiguration(event => {
+			//This if needs refactoring for more elegant solution.
+            if (event.affectsConfiguration('cid.modelProvider') ||
+				event.affectsConfiguration('cid.modelName')) {
+
+				llmConfig = getLlmConfig();
+                
+                apiProvider.getSecret(llmConfig.provider).then(api_key => {
+					model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined); // Updates model instance if settings changed.
+					vscode.window.showInformationMessage(`CiD: LLM Family changed to ${llmConfig.provider}.`);
+				});
+            }
+        })
+    );
+
+	context.subscriptions.push(
+		context.secrets.onDidChange(event => {
+			const expectedKey = `${llmConfig.provider}_api_key`;
+			if (event.key === expectedKey) {
+				llmConfig = getLlmConfig();
+				apiProvider.getSecret(llmConfig.provider).then(api_key => {
+					model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined);
+					// Opcional: Avisar o usuário que a instância do modelo atualizou após a nova chave
+					vscode.window.showInformationMessage(`CiD: API Key for ${llmConfig.provider} was updated and applied.`);
+				});
+			}
+		})
+	);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('cid.listWorkspaceFiles', repoProvider.getWorkspaceFileList)
@@ -106,6 +158,9 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(generateAndShowMermaidCommand);
 	context.subscriptions.push(testingGeminiCommand);
 	context.subscriptions.push(consolelogReadmeCommand);
+	context.subscriptions.push(setApiKeyCommand);
+	context.subscriptions.push(clearAllKeysCommand);
+
 
 }
 

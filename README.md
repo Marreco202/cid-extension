@@ -79,7 +79,6 @@ The extension automatically includes:
    npm run compile
    ```
 3. Configure your preferred AI model in the extension settings
-4. Add your API keys to a `.env` file (if using cloud models)
 
 ## Usage
 

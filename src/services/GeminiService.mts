@@ -8,24 +8,23 @@ export class GeminiService implements IModel {
   private model_name : string;
   private model_type : string;
   private data ?: Partial<IModelRequestData>;
-  private API_KEY : string;
+  private api_key : string;
   private googleGenAI : any;
   private mod : any;
 
-  constructor(model: string, data?: Partial<IModelRequestData>) {
+  constructor(model: string, api_key : string | undefined, data?: Partial<IModelRequestData>) {
     this.model_name = model;
     this.model_type = "Gemini";
 
     if(data) this.data = data; 
-
-    const API_KEY = process.env.GOOGLE_API_KEY; // set this in your environment
     
-    if (!API_KEY) {
-      throw new Error("Missing GOOGLE_API_KEY environment variable");
+    if (!api_key) {
+      throw new Error("Missing API Key for Gemini");
     }
     
-    this.googleGenAI = new GoogleGenAI({ apiKey: API_KEY });
-    this.API_KEY = API_KEY;
+    //Refactor this names. 3 different forms of saying "api keys". Confusing.
+    this.googleGenAI = new GoogleGenAI({ apiKey: api_key });
+    this.api_key = api_key;
 
   }
 
