@@ -13,16 +13,16 @@ export class GPTService implements IModel {
     private openAI : OpenAI;
     private base_url : string;
 
-    constructor(data?: Partial<IModelRequestData>, api_key?: string) {
+    constructor(model_name: string, api_key?: string, data?: Partial<IModelRequestData>) {
         // this.model_name = "o4-mini";
-        this.model_name = "gpt-5-mini";
+        this.model_name = model_name;
         this.model_type = "GPT";
         this.base_url = "https://api.openai.com/v1/chat/completions";
 
-        this.api_key = api_key ?? process.env.OPENAI_API_KEY;
+        this.api_key = api_key;
         
         if (!this.api_key) {
-            throw new Error("OpenAI API key not found. Set OPENAI_API_KEY environment variable or pass it to constructor.");
+            throw new Error("Missing API Key for ChatGPT");
         }
         
         this.openAI = new OpenAI({ apiKey: this.api_key });
