@@ -24,7 +24,6 @@ export class ApiService {
         if (apiKey) {
 			// Saves the encrypted key
 			await this._context.secrets.store(this.which_secret, apiKey);
-			// vscode.window.showInformationMessage('API Key saved safely!');
 		}
     }
 

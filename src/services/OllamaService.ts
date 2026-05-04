@@ -1,5 +1,4 @@
 import ollama from 'ollama';
-import * as vscode from 'vscode';
 import dotenv from 'dotenv';
 import * as path from 'path';
 import { IModel } from '../interfaces/IModel';
@@ -14,7 +13,7 @@ export class OllamaService implements IModel{
     private data ?: Partial<IModelRequestData>;
 
 
-    constructor(model_name : string, data ?: Partial<IModelRequestData>, model ?: string) {
+    constructor(model_name : string, data ?: Partial<IModelRequestData>) {
         this.model_name = model_name;
         this.model_type = "Ollama";
         
@@ -86,7 +85,7 @@ export class OllamaService implements IModel{
         this.data = data;
     }
 
-    getModelName(): string { //TODO: change it for model type
+    getModelName(): string {
         return this.model_type;
     }
 

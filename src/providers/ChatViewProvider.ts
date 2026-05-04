@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 
-// import {streamChatResponse} from '../services/OllamaService';
 import {getChatWebViewContent} from '../webViews';
 import { IModel } from '../interfaces/IModel';
 
@@ -14,7 +13,6 @@ export class ChatViewProvider {
         this._context = context;
     }
 
-    //Singleton
     public createOrShow(model: IModel){
         if(this._panel){
             this._panel.reveal(vscode.ViewColumn.One);

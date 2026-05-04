@@ -25,7 +25,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "cid" is now active!');
 	vscode.window.showInformationMessage('Hello World from CiD!');
 
-	// Instancia o nosso provedor da view de chat
 	const chatProvider = new ChatViewProvider(context);
 	const mermaidProvider = new MermaidViewProvider(context);
 	const repoProvider = new RepoDataProvider();
@@ -45,7 +44,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	let model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined);
 
 
-	// Registra o comando que simplesmente chama o método para mostrar a janela
 	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', async () => {
 		try {
 			const resolvedModel = await model;
@@ -130,7 +128,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				llmConfig = getLlmConfig();
 				apiProvider.getSecret(llmConfig.provider).then(api_key => {
 					model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined);
-					// Opcional: Avisar o usuário que a instância do modelo atualizou após a nova chave
 					vscode.window.showInformationMessage(`CiD: API Key for ${llmConfig.provider} was updated and applied.`);
 				});
 			}
@@ -164,5 +161,5 @@ export async function activate(context: vscode.ExtensionContext) {
 
 }
 
-// This method is called when your extension is deactivated
+
 export function deactivate() {}
