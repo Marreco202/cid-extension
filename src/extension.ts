@@ -89,21 +89,17 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	const deleteSavedDiagramCommand = vscode.commands.registerCommand('cid.deleteSavedDiagram', async (node: DiagramTreeItem) => {
         
-        // 1. Pede uma confirmação rápida (boa prática para deleções)
         const confirmation = await vscode.window.showWarningMessage(
             `Are you sure you want to delete the diagram "${node.label}"?`,
-            { modal: true }, // modal: true escurece o fundo e foca na pergunta
+            { modal: true },
             'Yes'
         );
 
         if (confirmation === 'Yes') {
-            // 2. Deleta do storage usando o ID
+            
             await storageService.deleteDiagram(node.diagramId);
-            
-            // 3. Atualiza a árvore para ele sumir da tela
             diagramsProvider.refresh();
-            
-            vscode.window.showInformationMessage(`Diagrama deletado com sucesso.`);
+            vscode.window.showInformationMessage(`Diagram deleted successfuly.`);
         }
     });
 
