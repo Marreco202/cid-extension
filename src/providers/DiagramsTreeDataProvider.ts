@@ -6,18 +6,6 @@ interface DiagramInfo {
   filePath: string;
 }
 
-//Mock para simular a busca de diagramas salvos
-async function getSavedDiagrams(): Promise<DiagramInfo[]> {
-
-    return [
-        { name: "Arquitetura do Projeto", filePath: "local://diagrams/arquitetura.mermaid" },
-        { name: "Fluxo de Usuário", filePath: "local://diagrams/user_flow.mermaid" }
-    ];
-    
-    // Para testar a mensagem de lista vazia, basta comentar o return acima e descomentar este:
-    // return [];
-}
-
 export class DiagramsTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
     
     private storageService: DiagramStorageService;
@@ -63,7 +51,7 @@ export class DiagramsTreeDataProvider implements vscode.TreeDataProvider<vscode.
         })
       );
     } else {
-      const emptyItem = new vscode.TreeItem('Nenhum diagrama salvo encontrado');
+      const emptyItem = new vscode.TreeItem('No diagrams were found.');
       emptyItem.iconPath = new vscode.ThemeIcon('info');
       return Promise.resolve([emptyItem]);
     }
