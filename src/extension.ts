@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-
+import { DiagramStorageService } from './services/DiagramStorageService'; //REFACTOR: Services must not live here!
 import { DiagramsTreeDataProvider } from './providers/DiagramsTreeDataProvider';
 import {RepoDataProvider} from './providers/RepoDataProvider';
 import {ChatViewProvider} from './providers/ChatViewProvider';
@@ -16,8 +16,9 @@ import { ApiProvider } from './providers/ApiProvider';
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
 
+	const storageService = new DiagramStorageService(context);
 
-	const diagramsProvider = new DiagramsTreeDataProvider();
+	const diagramsProvider = new DiagramsTreeDataProvider(storageService);
 	vscode.window.createTreeView('cid.functionsView', { //ID MUST BE THE SAME AS package.json
 		treeDataProvider: diagramsProvider
 	});
@@ -27,10 +28,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.window.showInformationMessage('Hello World from CiD!');
 
 	const chatProvider = new ChatViewProvider(context);
-	const mermaidProvider = new MermaidViewProvider(context);
 	const repoProvider = new RepoDataProvider();
 	const modelProvider = new ModelProvider();
 	const apiProvider = new ApiProvider(context);
+	const mermaidProvider = new MermaidViewProvider(context,storageService,diagramsProvider);
 
 	const getLlmConfig = () => {
 		const config = vscode.workspace.getConfiguration('cid');
@@ -81,6 +82,10 @@ export async function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage('Failed to Generate mermaid. See console for details.');
 		}
 	});
+
+	const openSavedDiagramCommand = vscode.commands.registerCommand('cid.openSavedDiagram', (mermaid: string, name: string) => {
+        mermaidProvider.showSavedDiagram(mermaid, name);
+    });
 
 	
 	const clearAllKeysCommand = vscode.commands.registerCommand('cid.clearAllApiKeys', async () => {
@@ -140,6 +145,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(showMermaidCommand);
 	context.subscriptions.push(generateAndShowMermaidCommandMOCK);
 	context.subscriptions.push(generateAndShowMermaidCommand);
+	context.subscriptions.push(openSavedDiagramCommand);
 	context.subscriptions.push(setApiKeyCommand);
 	context.subscriptions.push(clearAllKeysCommand);
 
