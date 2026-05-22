@@ -99,6 +99,11 @@
         "command": "cid.openSettings",
         "title": "CID: Open Settings",
         "icon": "$(settings-gear)"
+      },
+      {
+      "command": "cid.deleteSavedDiagram",
+      "title": "CID: Delete Diagram",
+      "icon": "$(trash)"
       }
     ],
     "views": {
@@ -122,6 +127,14 @@
           "command": "cid.openSettings",
           "when": "view == cid.functionsView",
           "group": "navigation@2"
+        }
+      ],
+
+      "view/item/context": [
+        {
+        "command": "cid.deleteSavedDiagram",
+        "when": "view == cid.functionsView && viewItem == savedDiagramItem",
+        "group": "inline"
         }
       ]
     },

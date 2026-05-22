@@ -49,18 +49,17 @@ export class DiagramsTreeDataProvider implements vscode.TreeDataProvider<vscode.
     if (diagrams.length > 0) {
       return Promise.resolve(
         diagrams.map(diag => {
-          const treeItem = new vscode.TreeItem(diag.name, vscode.TreeItemCollapsibleState.None);
-          treeItem.description = new Date(diag.timestamp).toLocaleDateString();
-          treeItem.iconPath = new vscode.ThemeIcon('type-hierarchy');
-          treeItem.contextValue = 'savedDiagramItem'; 
-
-          treeItem.command = {
-              command: 'cid.openSavedDiagram',
-              title: 'Abrir Diagrama',
-              arguments: [diag.mermaid, diag.name]
-          };
-          
-          return treeItem;
+            return new DiagramTreeItem(
+              diag.id, 
+              diag.name,
+              new Date(diag.timestamp).toLocaleDateString(),
+              diag.mermaid,
+              {
+                  command: 'cid.openSavedDiagram',
+                  title: 'Open Saved Diagram',
+                  arguments: [diag.mermaid, diag.name]
+              }
+          );
         })
       );
     } else {
@@ -69,4 +68,20 @@ export class DiagramsTreeDataProvider implements vscode.TreeDataProvider<vscode.
       return Promise.resolve([emptyItem]);
     }
   }
+}
+
+export class DiagramTreeItem extends vscode.TreeItem {
+    constructor(
+        public readonly diagramId: string,
+        public readonly label: string,
+        public readonly description: string,
+        public readonly code: string,
+        public readonly clickCommand: vscode.Command
+    ) {
+        super(label, vscode.TreeItemCollapsibleState.None);
+        this.description = description;
+        this.iconPath = new vscode.ThemeIcon('type-hierarchy');
+        this.contextValue = 'savedDiagramItem';
+        this.command = clickCommand;
+    }
 }

@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 
 import { DiagramStorageService } from './services/DiagramStorageService'; //REFACTOR: Services must not live here!
-import { DiagramsTreeDataProvider } from './providers/DiagramsTreeDataProvider';
+import { DiagramsTreeDataProvider,DiagramTreeItem } from './providers/DiagramsTreeDataProvider';
 import {RepoDataProvider} from './providers/RepoDataProvider';
 import {ChatViewProvider} from './providers/ChatViewProvider';
 import {MermaidViewProvider} from './providers/MermaidViewProvider';
@@ -87,6 +87,26 @@ export async function activate(context: vscode.ExtensionContext) {
         mermaidProvider.showSavedDiagram(mermaid, name);
     });
 
+	const deleteSavedDiagramCommand = vscode.commands.registerCommand('cid.deleteSavedDiagram', async (node: DiagramTreeItem) => {
+        
+        // 1. Pede uma confirmação rápida (boa prática para deleções)
+        const confirmation = await vscode.window.showWarningMessage(
+            `Are you sure you want to delete the diagram "${node.label}"?`,
+            { modal: true }, // modal: true escurece o fundo e foca na pergunta
+            'Yes'
+        );
+
+        if (confirmation === 'Yes') {
+            // 2. Deleta do storage usando o ID
+            await storageService.deleteDiagram(node.diagramId);
+            
+            // 3. Atualiza a árvore para ele sumir da tela
+            diagramsProvider.refresh();
+            
+            vscode.window.showInformationMessage(`Diagrama deletado com sucesso.`);
+        }
+    });
+
 	
 	const clearAllKeysCommand = vscode.commands.registerCommand('cid.clearAllApiKeys', async () => {
 		const confirmation = await vscode.window.showWarningMessage(
@@ -146,6 +166,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(generateAndShowMermaidCommandMOCK);
 	context.subscriptions.push(generateAndShowMermaidCommand);
 	context.subscriptions.push(openSavedDiagramCommand);
+	context.subscriptions.push(deleteSavedDiagramCommand);
 	context.subscriptions.push(setApiKeyCommand);
 	context.subscriptions.push(clearAllKeysCommand);
 
