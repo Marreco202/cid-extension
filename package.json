@@ -76,7 +76,8 @@
       },
       {
         "command": "cid.generateAndShowMermaid",
-        "title": "CID: Generate and Show Mermaid for Project"
+        "title": "CID: Generate and Show Mermaid for Project",
+        "icon" : "$(type-hierarchy)"
       },
       {
         "command": "cid.testingGemini",
@@ -109,6 +110,12 @@
         {
           "command": "cid.helloWorld",
           "when": "view === cid.functionsView",
+          "group": "navigation"
+        },
+
+        {
+          "command": "cid.generateAndShowMermaid",
+          "when": "view== cid.functionsView",
           "group": "navigation"
         }
       ]
