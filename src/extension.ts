@@ -2,8 +2,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import { FunctionsTreeDataProvider } from './providers/FunctionsTreeDataProvider';
-import {analyzePythonFiles} from './extractionFeatures'; //FIX: Change import to correct file name
+
+import { DiagramsTreeDataProvider } from './providers/DiagramsTreeDataProvider';
 import {RepoDataProvider} from './providers/RepoDataProvider';
 import {ChatViewProvider} from './providers/ChatViewProvider';
 import {MermaidViewProvider} from './providers/MermaidViewProvider';
@@ -16,11 +16,12 @@ import { ApiProvider } from './providers/ApiProvider';
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
 
-	  // REGISTRA A NOVA TREE VIEW
-	const functionsProvider = new FunctionsTreeDataProvider();
+
+	const diagramsProvider = new DiagramsTreeDataProvider();
 	vscode.window.createTreeView('cid.functionsView', { //ID MUST BE THE SAME AS package.json
-		treeDataProvider: functionsProvider
+		treeDataProvider: diagramsProvider
 	});
+
 
 	console.log('Congratulations, your extension "cid" is now active!');
 	vscode.window.showInformationMessage('Hello World from CiD!');
@@ -128,10 +129,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('cid.listWorkspaceFiles', repoProvider.getWorkspaceFileList)
-	);
-	
-	context.subscriptions.push(
-		vscode.commands.registerCommand('cid.analyzePythonFiles', analyzePythonFiles)
 	);
 	
 // 	context.subscriptions.push(
