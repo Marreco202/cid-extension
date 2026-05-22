@@ -94,6 +94,11 @@
       {
         "command": "cid.clearAllApiKeys",
         "title": "CID: Clear All Saved API Keys"
+      },
+      {
+        "command": "cid.openSettings",
+        "title": "CID: Open Settings",
+        "icon": "$(settings-gear)"
       }
     ],
     "views": {
@@ -115,8 +120,14 @@
 
         {
           "command": "cid.generateAndShowMermaid",
-          "when": "view== cid.functionsView",
+          "when": "view == cid.functionsView",
           "group": "navigation"
+        },
+
+        {
+          "command": "cid.openSettings",
+          "when": "view == cid.functionsView",
+          "group": "navigation@2"
         }
       ]
     },

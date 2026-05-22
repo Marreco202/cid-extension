@@ -44,6 +44,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	let model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined);
 
 
+	const openSettingsCommand = vscode.commands.registerCommand('cid.openSettings', () => {
+    vscode.commands.executeCommand('workbench.action.openSettings', 'cid'); 
+});
+
 	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', async () => {
 		try {
 			const resolvedModel = await model;
@@ -133,6 +137,8 @@ export async function activate(context: vscode.ExtensionContext) {
 // 	context.subscriptions.push(
 //     vscode.commands.registerCommand('cid.explainSelectedCode', model.explainSelectedCode) //Esse comando sempre da erro quando o modelo selecionado nao for o Olama. BUG FIX
 // );
+
+	context.subscriptions.push(openSettingsCommand);
 	context.subscriptions.push(chatCommand);
 	context.subscriptions.push(showMermaidCommand);
 	context.subscriptions.push(generateAndShowMermaidCommandMOCK);
