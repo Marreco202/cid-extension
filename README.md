@@ -6,7 +6,7 @@
 
 An open-source VS Code extension that helps newcomers understand and contribute to open-source repositories through AI-generated architectural diagrams.
 
-[![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)](https://marketplace.visualstudio.com/items?itemName=Marreco202.cid-extension)
+[![Version](https://img.shields.io/badge/version-0.0.3-blue.svg)](https://marketplace.visualstudio.com/items?itemName=Marreco202.cid-extension)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue.svg)](https://code.visualstudio.com/api)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTE.md)
@@ -47,9 +47,8 @@ For rendering the mermaid file opened on WebView:
 ### 🎨 Custom Sidebar View
 
 Access CiD features through a dedicated sidebar panel in the Activity Bar:
-- Quick access to the chat interface
-- Generate graphs [TODO]
-- Easy navigation to all CiD commands [TODO]
+- Generate, save, and graphs
+- Easy API key and model configuration
 
 ## Requirements
 
@@ -109,13 +108,6 @@ This extension is currently in early development. Configuration settings will be
 - API endpoints
 - Custom prompts
 - Output preferences
-
-## Known Issues
-
-- The extension is in active development (v0.0.1)
-- Some commands are experimental and may require additional configuration
-- Python analysis feature is optimized for Python files only (needs help)
-- At the current state, the graph generation won't work due to a bug (explained in [Issue #8](https://github.com/Marreco202/cid-extension/issues/8))
 
 ## Architecture
 
