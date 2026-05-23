@@ -2,8 +2,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import { FunctionsTreeDataProvider } from './providers/FunctionsTreeDataProvider';
-import {analyzePythonFiles} from './extractionFeatures'; //FIX: Change import to correct file name
+import { DiagramStorageService } from './services/DiagramStorageService'; //REFACTOR: Services must not live here!
+import { DiagramsTreeDataProvider,DiagramTreeItem } from './providers/DiagramsTreeDataProvider';
 import {RepoDataProvider} from './providers/RepoDataProvider';
 import {ChatViewProvider} from './providers/ChatViewProvider';
 import {MermaidViewProvider} from './providers/MermaidViewProvider';
@@ -16,20 +16,22 @@ import { ApiProvider } from './providers/ApiProvider';
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
 
-	  // REGISTRA A NOVA TREE VIEW
-	const functionsProvider = new FunctionsTreeDataProvider();
+	const storageService = new DiagramStorageService(context);
+
+	const diagramsProvider = new DiagramsTreeDataProvider(storageService);
 	vscode.window.createTreeView('cid.functionsView', { //ID MUST BE THE SAME AS package.json
-		treeDataProvider: functionsProvider
+		treeDataProvider: diagramsProvider
 	});
+
 
 	console.log('Congratulations, your extension "cid" is now active!');
 	vscode.window.showInformationMessage('Hello World from CiD!');
 
 	const chatProvider = new ChatViewProvider(context);
-	const mermaidProvider = new MermaidViewProvider(context);
 	const repoProvider = new RepoDataProvider();
 	const modelProvider = new ModelProvider();
 	const apiProvider = new ApiProvider(context);
+	const mermaidProvider = new MermaidViewProvider(context,storageService,diagramsProvider);
 
 	const getLlmConfig = () => {
 		const config = vscode.workspace.getConfiguration('cid');
@@ -43,6 +45,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	const api_key = await apiProvider.getSecret(llmConfig.provider);
 	let model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined);
 
+
+	const openSettingsCommand = vscode.commands.registerCommand('cid.openSettings', () => {
+    vscode.commands.executeCommand('workbench.action.openSettings', 'cid'); 
+});
 
 	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', async () => {
 		try {
@@ -76,6 +82,26 @@ export async function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage('Failed to Generate mermaid. See console for details.');
 		}
 	});
+
+	const openSavedDiagramCommand = vscode.commands.registerCommand('cid.openSavedDiagram', (mermaid: string, name: string) => {
+        mermaidProvider.showSavedDiagram(mermaid, name);
+    });
+
+	const deleteSavedDiagramCommand = vscode.commands.registerCommand('cid.deleteSavedDiagram', async (node: DiagramTreeItem) => {
+        
+        const confirmation = await vscode.window.showWarningMessage(
+            `Are you sure you want to delete the diagram "${node.label}"?`,
+            { modal: true },
+            'Yes'
+        );
+
+        if (confirmation === 'Yes') {
+            
+            await storageService.deleteDiagram(node.diagramId);
+            diagramsProvider.refresh();
+            vscode.window.showInformationMessage(`Diagram deleted successfuly.`);
+        }
+    });
 
 	
 	const clearAllKeysCommand = vscode.commands.registerCommand('cid.clearAllApiKeys', async () => {
@@ -126,17 +152,17 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('cid.listWorkspaceFiles', repoProvider.getWorkspaceFileList)
 	);
 	
-	context.subscriptions.push(
-		vscode.commands.registerCommand('cid.analyzePythonFiles', analyzePythonFiles)
-	);
-	
 // 	context.subscriptions.push(
 //     vscode.commands.registerCommand('cid.explainSelectedCode', model.explainSelectedCode) //Esse comando sempre da erro quando o modelo selecionado nao for o Olama. BUG FIX
 // );
+
+	context.subscriptions.push(openSettingsCommand);
 	context.subscriptions.push(chatCommand);
 	context.subscriptions.push(showMermaidCommand);
 	context.subscriptions.push(generateAndShowMermaidCommandMOCK);
 	context.subscriptions.push(generateAndShowMermaidCommand);
+	context.subscriptions.push(openSavedDiagramCommand);
+	context.subscriptions.push(deleteSavedDiagramCommand);
 	context.subscriptions.push(setApiKeyCommand);
 	context.subscriptions.push(clearAllKeysCommand);
 
