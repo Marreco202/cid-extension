@@ -76,7 +76,8 @@
       },
       {
         "command": "cid.generateAndShowMermaid",
-        "title": "CID: Generate and Show Mermaid for Project"
+        "title": "CID: Generate and Show Mermaid for Project",
+        "icon" : "$(type-hierarchy)"
       },
       {
         "command": "cid.testingGemini",
@@ -93,6 +94,16 @@
       {
         "command": "cid.clearAllApiKeys",
         "title": "CID: Clear All Saved API Keys"
+      },
+      {
+        "command": "cid.openSettings",
+        "title": "CID: Open Settings",
+        "icon": "$(settings-gear)"
+      },
+      {
+      "command": "cid.deleteSavedDiagram",
+      "title": "CID: Delete Diagram",
+      "icon": "$(trash)"
       }
     ],
     "views": {
@@ -107,9 +118,23 @@
     "menus": {
       "view/title": [
         {
-          "command": "cid.helloWorld",
-          "when": "view === cid.functionsView",
+          "command": "cid.generateAndShowMermaid",
+          "when": "view == cid.functionsView",
           "group": "navigation"
+        },
+
+        {
+          "command": "cid.openSettings",
+          "when": "view == cid.functionsView",
+          "group": "navigation@2"
+        }
+      ],
+
+      "view/item/context": [
+        {
+        "command": "cid.deleteSavedDiagram",
+        "when": "view == cid.functionsView && viewItem == savedDiagramItem",
+        "group": "inline"
         }
       ]
     },

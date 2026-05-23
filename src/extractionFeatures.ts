@@ -6,16 +6,6 @@ export async function listWorkspaceFiles(){
 	vscode.window.showInformationMessage(`Arquivos encontrados:\n${paths}`, { modal: true });
 }
 
-
-export async function explainCurrentFile(){
-	const editor = vscode.window.activeTextEditor;
-	if (editor) {
-		const text = editor.document.getText();
-		vscode.window.showInformationMessage(`Codigo atual:\n${text}`, { modal: true });
-	}
-		return undefined;
-}
-
 export async function analyzePythonFiles() {
     const files = await vscode.workspace.findFiles('**/*.py'); // procura todos arquivos .py no workspace
 	const output = vscode.window.createOutputChannel("CID: Python functions");

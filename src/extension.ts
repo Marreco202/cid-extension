@@ -2,8 +2,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import { FunctionsTreeDataProvider } from './providers/FunctionsTreeDataProvider';
-import { explainCurrentFile,analyzePythonFiles} from './extractionFeatures'; //FIX: Change import to correct file name
+import { DiagramStorageService } from './services/DiagramStorageService'; //REFACTOR: Services must not live here!
+import { DiagramsTreeDataProvider,DiagramTreeItem } from './providers/DiagramsTreeDataProvider';
 import {RepoDataProvider} from './providers/RepoDataProvider';
 import {ChatViewProvider} from './providers/ChatViewProvider';
 import {MermaidViewProvider} from './providers/MermaidViewProvider';
@@ -16,21 +16,22 @@ import { ApiProvider } from './providers/ApiProvider';
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
 
-	  // REGISTRA A NOVA TREE VIEW
-	const functionsProvider = new FunctionsTreeDataProvider();
-	vscode.window.createTreeView('cid.functionsView', { // O ID DEVE SER O MESMO DO package.json
-		treeDataProvider: functionsProvider
+	const storageService = new DiagramStorageService(context);
+
+	const diagramsProvider = new DiagramsTreeDataProvider(storageService);
+	vscode.window.createTreeView('cid.functionsView', { //ID MUST BE THE SAME AS package.json
+		treeDataProvider: diagramsProvider
 	});
+
 
 	console.log('Congratulations, your extension "cid" is now active!');
 	vscode.window.showInformationMessage('Hello World from CiD!');
 
-	// Instancia o nosso provedor da view de chat
 	const chatProvider = new ChatViewProvider(context);
-	const mermaidProvider = new MermaidViewProvider(context);
 	const repoProvider = new RepoDataProvider();
 	const modelProvider = new ModelProvider();
 	const apiProvider = new ApiProvider(context);
+	const mermaidProvider = new MermaidViewProvider(context,storageService,diagramsProvider);
 
 	const getLlmConfig = () => {
 		const config = vscode.workspace.getConfiguration('cid');
@@ -45,7 +46,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	let model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined);
 
 
-	// Registra o comando que simplesmente chama o método para mostrar a janela
+	const openSettingsCommand = vscode.commands.registerCommand('cid.openSettings', () => {
+    vscode.commands.executeCommand('workbench.action.openSettings', 'cid'); 
+});
+
 	const chatCommand = vscode.commands.registerCommand('cid.helloWorld', async () => {
 		try {
 			const resolvedModel = await model;
@@ -79,22 +83,27 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	const consolelogReadmeCommand = vscode.commands.registerCommand("cid.printReadMe", async () => {
-		repoProvider.getReadme();
-	});
+	const openSavedDiagramCommand = vscode.commands.registerCommand('cid.openSavedDiagram', (mermaid: string, name: string) => {
+        mermaidProvider.showSavedDiagram(mermaid, name);
+    });
+
+	const deleteSavedDiagramCommand = vscode.commands.registerCommand('cid.deleteSavedDiagram', async (node: DiagramTreeItem) => {
+        
+        const confirmation = await vscode.window.showWarningMessage(
+            `Are you sure you want to delete the diagram "${node.label}"?`,
+            { modal: true },
+            'Yes'
+        );
+
+        if (confirmation === 'Yes') {
+            
+            await storageService.deleteDiagram(node.diagramId);
+            diagramsProvider.refresh();
+            vscode.window.showInformationMessage(`Diagram deleted successfuly.`);
+        }
+    });
+
 	
-	const testingGeminiCommand = vscode.commands.registerCommand('cid.testingGemini', async () => {
-		try {
-
-			const model_instance = await new ModelProvider().factory("gemini-2.5-pro","Gemini");
-			model_instance.generateResponse("What is the meaning of life? Use 50 words max");
-
-		} catch (err) {
-			console.error('Failed to load/run Gemini test:', err);
-			vscode.window.showErrorMessage('Failed to run Gemini test. See console for details.');
-		}
-	});
-
 	const clearAllKeysCommand = vscode.commands.registerCommand('cid.clearAllApiKeys', async () => {
 		const confirmation = await vscode.window.showWarningMessage(
 			'Are you sure you want to delete ALL saved API Keys?',
@@ -106,6 +115,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
+	//Config Changes Listener
 
 	context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration(event => {
@@ -123,6 +133,8 @@ export async function activate(context: vscode.ExtensionContext) {
         })
     );
 
+	//Secrets Listener
+
 	context.subscriptions.push(
 		context.secrets.onDidChange(event => {
 			const expectedKey = `${llmConfig.provider}_api_key`;
@@ -130,7 +142,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				llmConfig = getLlmConfig();
 				apiProvider.getSecret(llmConfig.provider).then(api_key => {
 					model = modelProvider.factory(llmConfig.provider, llmConfig.selectedModel, api_key ? api_key : undefined);
-					// Opcional: Avisar o usuário que a instância do modelo atualizou após a nova chave
 					vscode.window.showInformationMessage(`CiD: API Key for ${llmConfig.provider} was updated and applied.`);
 				});
 			}
@@ -141,28 +152,22 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('cid.listWorkspaceFiles', repoProvider.getWorkspaceFileList)
 	);
 	
-	context.subscriptions.push(
-		vscode.commands.registerCommand('cid.explainCurrentFile', explainCurrentFile)
-	);
-	
-	context.subscriptions.push(
-		vscode.commands.registerCommand('cid.analyzePythonFiles', analyzePythonFiles)
-	);
-	
 // 	context.subscriptions.push(
 //     vscode.commands.registerCommand('cid.explainSelectedCode', model.explainSelectedCode) //Esse comando sempre da erro quando o modelo selecionado nao for o Olama. BUG FIX
 // );
+
+	context.subscriptions.push(openSettingsCommand);
 	context.subscriptions.push(chatCommand);
 	context.subscriptions.push(showMermaidCommand);
 	context.subscriptions.push(generateAndShowMermaidCommandMOCK);
 	context.subscriptions.push(generateAndShowMermaidCommand);
-	context.subscriptions.push(testingGeminiCommand);
-	context.subscriptions.push(consolelogReadmeCommand);
+	context.subscriptions.push(openSavedDiagramCommand);
+	context.subscriptions.push(deleteSavedDiagramCommand);
 	context.subscriptions.push(setApiKeyCommand);
 	context.subscriptions.push(clearAllKeysCommand);
 
 
 }
 
-// This method is called when your extension is deactivated
+
 export function deactivate() {}

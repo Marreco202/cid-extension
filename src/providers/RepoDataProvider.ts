@@ -1,6 +1,5 @@
-import * as vscode from 'vscode';
 import {findReadmeFile, getWorkspaceFileString} from '../services/RepositoryService';
-import { read } from 'fs';
+
 
 export class RepoDataProvider {
 

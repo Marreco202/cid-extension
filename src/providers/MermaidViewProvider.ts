@@ -7,15 +7,29 @@ import {getWorkspaceFileString, findReadmeFile} from '../services/RepositoryServ
 import {BASE_SYSTEM_FIRST_PROMPT,BASE_SYSTEM_SECOND_PROMPT,BASE_SYSTEM_THIRD_PROMPT} from '../prompts/BaselineSysPrompt';
 import { IModel } from '../interfaces/IModel';
 import { GEMINI_CORRECT_MERMAID } from '../prompts/GeminiPrompts';
+import { DiagramStorageService } from '../services/DiagramStorageService';
+import { DiagramsTreeDataProvider } from './DiagramsTreeDataProvider';
+// import mermaid from 'mermaid';
 
 export class MermaidViewProvider {
 
     private readonly _context : vscode.ExtensionContext;
+    private readonly _storageService: DiagramStorageService;
+    private readonly _diagramsTreeDataProvider: DiagramsTreeDataProvider;
     
-    constructor(context: vscode.ExtensionContext){
+    constructor(
+      context: vscode.ExtensionContext,
+      storageService: DiagramStorageService, 
+      diagramsTreeDataProvider: DiagramsTreeDataProvider
+    ){
         this._context = context;
+        this._storageService = storageService;
+        this._diagramsTreeDataProvider = diagramsTreeDataProvider;
     }
     
+    public showSavedDiagram(mermaid: string, name: string) {
+      this.showMermaidFile(mermaid,name);
+    }
 
     private showMermaidFile(fileContent : string, fileName? : string){
       const panel = vscode.window.createWebviewPanel(
@@ -138,6 +152,25 @@ export class MermaidViewProvider {
             // Se a geração foi bem-sucedida (não foi cancelada), mostre o resultado.
             if (mermaidString) {
                 this.showMermaidFile(mermaidString, "Project Diagram"); //TODO colocar o nome do repositorio nesse titulo
+            }
+            else if(mermaidString === null){
+              throw new Error("Error on the diagram generation");
+            }
+
+            //Asking if wants to save diagram
+            const diagramName = await vscode.window.showInputBox({
+                    prompt: 'Do you want to save this diagram in the project history? Type a name:',
+                    placeHolder: 'Ex: Architecture, Data Flow...',
+                    ignoreFocusOut: false // If they click outside the box, cancel the save (but the graph stays on screen)
+            });
+
+            if (diagramName) {
+                    
+                    await this._storageService.saveDiagram(diagramName, mermaidString);
+                    
+                    // Notifies TreeView to reload the diagram list
+                    this._diagramsTreeDataProvider.refresh();
+                    vscode.window.showInformationMessage(`Diagram "${diagramName}" saved sucessfuly!`);
             }
 
         } catch (error: any) {
