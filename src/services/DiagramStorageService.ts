@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { randomUUID } from 'crypto';
 
 export interface SavedDiagram {
     id: string;
@@ -30,7 +31,7 @@ export class DiagramStorageService {
         const diagrams = this.getDiagrams();
         
         const newDiagram: SavedDiagram = {
-            id: 'diag_' + Math.random().toString(36).substring(2, 11), // ID único simples
+            id: 'diag_' + randomUUID(),
             name: name,
             mermaid: mermaid,
             timestamp: Date.now()

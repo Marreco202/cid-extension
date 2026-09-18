@@ -96,10 +96,16 @@ export async function getWorkspaceFileList(dir: string = ".", baseDir: string = 
     }
 
     // Fallback: treat dir as a single folder search (best-effort)
+    // Guarda de segurança: recusa buscar fora de qualquer workspace folder conhecida
+    const isWithinAnyWorkspace = workspaceFolders.some(f => dirFsPath.startsWith(f.uri.fsPath));
+    if (!isWithinAnyWorkspace) {
+        throw new Error(`Path outside workspace bounds is not allowed: '${dir}'`);
+    }
     const fallbackPattern = new vscode.RelativePattern(vscode.Uri.file(dirFsPath), '**/*' as any);
     const uris = await vscode.workspace.findFiles(fallbackPattern, DEFAULT_EXCLUDE);
     return uris.map(u => path.relative(dirFsPath, u.fsPath));
 }
+
 /**
  * Retorna uma única string com todos os caminhos de arquivo, separados por quebra de linha.
  * * Esta função agora também é assíncrona.
